@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOPI — Producción & Costes</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --rosa: #F72585;
+  --rosa-light: #fff0f6;
+  --naranja: #FF7700;
+  --amarillo: #d97706;
+  --verde: #16a34a;
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --surface2: #f8f8fa;
+  --border: #e5e7eb;
+  --text: #111827;
+  --muted: #6b7280;
+  --muted2: #9ca3af;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.logo{background:var(--rosa);color:#fff;font-weight:800;font-size:13px;letter-spacing:.1em;padding:5px 14px;border-radius:100px}
+.topbar-title{font-size:14px;font-weight:700}
+.topbar-sub{font-size:11px;color:var(--muted);font-family:'Inter',sans-serif;margin-top:1px}
+
+.tabs{display:flex;border-bottom:1px solid var(--border);background:#fff;padding:0 28px;overflow-x:auto}
+.tab{padding:13px 22px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;font-family:'Syne',sans-serif;letter-spacing:.05em;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--rosa);border-bottom-color:var(--rosa)}
+
+.panel{display:none;padding:24px 28px;max-width:980px;margin:0 auto}
+.panel.active{display:block}
+
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px}
+.card-title{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-family:'Inter',sans-serif;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.form-grid{display:grid;gap:12px}
+.cols-2{grid-template-columns:1fr 1fr}
+.cols-3{grid-template-columns:1fr 1fr 1fr}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-family:'Inter',sans-serif}
+.iw{position:relative;display:flex;align-items:center}
+.iw input,.iw select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Inter',sans-serif;font-size:18px;font-weight:700;padding:10px 46px 10px 13px;outline:none;transition:border-color .18s,box-shadow .18s}
+.iw input:focus,.iw select:focus{border-color:var(--rosa);box-shadow:0 0 0 3px rgba(247,37,133,0.1);background:#fff}
+.iu{position:absolute;right:11px;font-family:'Inter',sans-serif;font-size:11px;font-weight:500;color:var(--muted2);pointer-events:none}
+
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.kpi-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-family:'Inter',sans-serif;margin-bottom:6px}
+.kv{font-size:26px;font-weight:700;line-height:1;font-family:'Inter',sans-serif}
+.kv.rosa{color:var(--rosa)}
+.kv.verde{color:var(--verde)}
+.kv.naranja{color:var(--naranja)}
+.kv.amber{color:var(--amarillo)}
+.kpi-sub{font-size:11px;color:var(--muted2);font-family:'Inter',sans-serif;margin-top:5px}
+
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{padding:9px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface2);font-family:'Inter',sans-serif}
+.tbl th.r{text-align:right}
+.tbl td{padding:11px 14px;font-size:13px;border-bottom:1px solid #f3f4f6;vertical-align:middle;color:var(--text)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#fafafa}
+.tbl td.r{text-align:right;font-family:'Inter',sans-serif;font-size:14px;font-weight:600}
+.nc{display:flex;align-items:center;gap:8px;font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,0.1)}
+.gr td{background:#f3f4f6!important;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-family:'Inter',sans-serif;padding:7px 14px}
+.tr-total td{background:var(--rosa-light)!important;border-top:2px solid rgba(247,37,133,0.2)!important;font-weight:700;font-family:'Inter',sans-serif;font-size:14px;color:var(--rosa)}
+.tr-total td:first-child{color:var(--text)}
+.tr-sub td{background:#f9fafb!important;border-top:1px solid var(--border)!important;font-weight:700;font-family:'Inter',sans-serif;font-size:13px}
+
+/* inline inputs for dips/packaging rows */
+.row-input{background:var(--surface2);border:1px solid var(--border);border-radius:7px;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;padding:7px 10px;outline:none;width:140px;color:var(--text);transition:border-color .15s}
+.row-input:focus{border-color:var(--rosa)}
+.num-input{background:#fff;border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Inter',sans-serif;font-size:15px;font-weight:600;padding:7px 9px;outline:none;text-align:right;transition:border-color .15s,box-shadow .15s;width:84px;cursor:text}
+.num-input::placeholder{color:var(--muted2);font-weight:400}
+.num-input:focus{border-color:var(--rosa);box-shadow:0 0 0 2px rgba(247,37,133,0.12);background:#fff8fb}
+.unit-sel{background:#f3f4f6;border:1px solid var(--border);border-radius:7px;color:var(--muted);font-family:'Inter',sans-serif;font-size:11px;padding:7px 8px;outline:none;cursor:pointer}
+.unit-sel:focus{border-color:var(--rosa)}
+
+.sep-bar{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:11px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.sep-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+.sep-right{display:flex;align-items:center;gap:10px}
+.sep-total{font-family:'Inter',sans-serif;font-size:15px;color:var(--rosa);font-weight:700}
+
+.rent-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.rent-block{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px}
+.rent-block h3{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-family:'Inter',sans-serif;margin-bottom:12px}
+.rr{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.rr:last-child{border-bottom:none}
+.rl{color:var(--muted)}
+.rv{font-family:'Inter',sans-serif;font-weight:700;font-size:15px}
+.rv.pos{color:var(--verde)}
+.rv.neg{color:var(--rosa)}
+.rv.warn{color:var(--amarillo)}
+
+.margin-hero{border-radius:14px;padding:22px 24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;border:2px solid}
+.margin-hero.pos{background:#f0fdf4;border-color:#86efac}
+.margin-hero.neg{background:#fff0f6;border-color:#fbcfe8}
+.hero-pct{font-size:60px;font-weight:800;line-height:1;letter-spacing:-.02em;font-family:'Inter',sans-serif}
+.hero-label{font-size:12px;color:var(--muted);margin-top:5px;font-family:'Inter',sans-serif}
+.hero-right{text-align:right}
+.hero-sublabel{font-size:11px;color:var(--muted);font-family:'Inter',sans-serif;margin-bottom:4px}
+.hero-bignum{font-size:34px;font-weight:800;font-family:'Inter',sans-serif}
+
+.pvp-row{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px}
+.pvp-row label{font-size:13px;font-weight:700;flex:1}
+.pvp-row input{width:110px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--rosa);font-family:'Inter',sans-serif;font-size:22px;font-weight:800;padding:9px 12px;outline:none;text-align:right;transition:border-color .15s}
+.pvp-row input:focus{border-color:var(--rosa)}
+.pvp-row .suf{font-size:14px;color:var(--muted);font-family:'Inter',sans-serif}
+
+.badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;padding:3px 10px;border-radius:100px;text-transform:uppercase;font-family:'Inter',sans-serif}
+.b-ok{background:#dcfce7;color:#15803d}
+.b-warn{background:#fef9c3;color:#a16207}
+.b-bad{background:#ffe4f0;color:#be185d}
+
+.btn-p{background:var(--rosa);color:#fff;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:9px 16px;cursor:pointer;transition:opacity .15s}
+.btn-p:hover{opacity:.85}
+.btn-s{background:#fff;color:var(--muted);border:1px solid var(--border);border-radius:9px;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;padding:9px 16px;cursor:pointer;transition:all .15s}
+.btn-s:hover{border-color:var(--rosa);color:var(--rosa)}
+.btn-add{display:inline-flex;align-items:center;gap:5px;background:var(--rosa-light);color:var(--rosa);border:1px solid rgba(247,37,133,0.25);border-radius:8px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;transition:all .15s}
+.btn-add:hover{background:var(--rosa);color:#fff}
+.btn-del{background:none;border:1px solid #fca5a5;border-radius:6px;color:#ef4444;font-size:11px;padding:4px 8px;cursor:pointer;transition:all .15s;line-height:1}
+.btn-del:hover{background:#fff5f5;border-color:#ef4444}
+
+.note-box{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;font-family:'Inter',sans-serif;font-size:11px;color:#92400e;line-height:1.7;margin-top:12px}
+
+@media(max-width:640px){
+  .kpi-strip{grid-template-columns:1fr 1fr}
+  .cols-3{grid-template-columns:1fr 1fr}
+  .rent-grid{grid-template-columns:1fr}
+  .panel{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="logo">DOPI</span>
+    <div>
+      <div class="topbar-title">Calculadora de Producción & Costes</div>
+      <div class="topbar-sub">Cookies · Dips · Packaging · Rentabilidad</div>
+    </div>
+  </div>
+  <button class="btn-s" onclick="window.print()">🖨 Imprimir</button>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('receta',this)">🍪 Receta escalada</button>
+  <button class="tab" onclick="switchTab('costes',this)">💰 Costes</button>
+  <button class="tab" onclick="switchTab('rent',this)">📊 Rentabilidad</button>
+  <button class="tab" onclick="switchTab('recetario',this)">📖 Recetario</button>
+  <button class="tab" onclick="switchTab('extras',this)">🍫 Frostings & Dips</button>
+</div>
+
+<!-- ══ TAB RECETA ══ -->
+<div class="panel active" id="panel-receta">
+  <div class="card">
+    <div class="card-title" style="margin-bottom:12px">Parámetros de producción</div>
+    <!-- MODE TOGGLE -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+      <span style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-family:'Inter',sans-serif">Calcular por</span>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="rec-mode-uds" onclick="setRecMode('uds')">Unidades</button>
+        <button class="mode-btn" id="rec-mode-kg" onclick="setRecMode('kg')">Kilogramos</button>
+      </div>
+    </div>
+    <div class="form-grid cols-3" style="margin-bottom:14px">
+      <div class="field" id="rec-field-uds">
+        <label id="rec-label-qty">Nº de cookies a producir</label>
+        <div class="iw"><input type="text" id="num-cookies" value="24" oninput="recalcAll()"><span class="iu" id="rec-unit-qty">uds</span></div>
+      </div>
+      <div class="field">
+        <label>Peso por porción (masa cruda)</label>
+        <div class="iw"><input type="number" id="peso-porcion" value="130" min="80" max="200" step="5" oninput="recalcAll()"><span class="iu">g</span></div>
+      </div>
+      <div class="field">
+        <label>Merma de producción</label>
+        <div class="iw"><input type="number" id="merma-pct" value="5" min="0" max="20" step="0.5" oninput="recalcAll()"><span class="iu">%</span></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap" id="rec-presets">
+      <button class="btn-s" onclick="setPreset(12,130)">12 uds · 130g</button>
+      <button class="btn-s" onclick="setPreset(24,130)">24 uds · 130g</button>
+      <button class="btn-s" onclick="setPreset(48,145)">48 uds · 145g</button>
+      <button class="btn-s" onclick="setPreset(100,130)">100 uds · 130g</button>
+    </div>
+  </div>
+
+  <div class="kpi-strip">
+    <div class="kpi"><div class="kpi-label">Cookies objetivo</div><div class="kv rosa" id="kpi-cookies">24</div><div class="kpi-sub">unidades</div></div>
+    <div class="kpi"><div class="kpi-label">Masa total bruta</div><div class="kv amber" id="kpi-masa-total">—</div><div class="kpi-sub">incl. merma</div></div>
+    <div class="kpi"><div class="kpi-label">Factor de escala</div><div class="kv naranja" id="kpi-factor">—</div><div class="kpi-sub">vs. receta base ×1</div></div>
+    <div class="kpi"><div class="kpi-label">Peso horneado/cookie</div><div class="kv verde" id="kpi-peso-horneado">—</div><div class="kpi-sub">aprox. (−16% humedad)</div></div>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="min-width:210px">Ingrediente</th>
+          <th class="r">Base (12 uds)</th>
+          <th class="r">Cantidad necesaria</th>
+          <th class="r">Medida aprox.</th>
+          <th class="r">Baker's %</th>
+        </tr>
+      </thead>
+      <tbody id="recipe-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="note-box">
+    <strong>Conversiones rápidas:</strong> 1 huevo L ≈ 58g · 1 yema ≈ 18g · 1 cdta = 5ml · 1 cda = 15ml · 1 taza = 240ml<br>
+    Harina: 1 taza ≈ 122g &nbsp;·&nbsp; Azúcar blanco: 1 taza ≈ 200g &nbsp;·&nbsp; Azúcar moreno: 1 taza ≈ 220g &nbsp;·&nbsp; Mantequilla: 1 taza = 227g
+  </div>
+</div>
+
+<!-- ══ TAB COSTES ══ -->
+<div class="panel" id="panel-costes">
+
+  <!-- MASA -->
+  <div class="sep-bar">
+    <div class="sep-title">🍪 Masa de cookies</div>
+    <div class="sep-total" id="sep-masa">€0.00</div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px">
+    <table class="tbl">
+      <thead><tr>
+        <th>Ingrediente</th><th>Unidad compra</th>
+        <th class="r">Precio</th><th class="r">Cantidad receta</th>
+        <th class="r">Coste batch</th><th class="r">€/cookie</th>
+      </tr></thead>
+      <tbody id="tbody-masa"></tbody>
+    </table>
+  </div>
+
+  <!-- DIPS -->
+  <div class="sep-bar">
+    <div class="sep-title">🫙 Salsas dip</div>
+    <div class="sep-right">
+      <div class="sep-total" id="sep-dips">€0.00</div>
+      <button class="btn-add" onclick="addDip()">+ Añadir dip</button>
+    </div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px">
+    <table class="tbl">
+      <thead><tr>
+        <th>Nombre del dip</th><th>Unidad compra</th>
+        <th class="r">Precio</th><th class="r">Gramaje/cookie</th>
+        <th class="r">Coste batch</th><th class="r">€/cookie</th>
+        <th style="width:40px"></th>
+      </tr></thead>
+      <tbody id="tbody-dips"></tbody>
+    </table>
+  </div>
+
+  <!-- PACKAGING -->
+  <div class="sep-bar">
+    <div class="sep-title">📦 Packaging</div>
+    <div class="sep-right">
+      <div class="sep-total" id="sep-pack">€0.00</div>
+      <button class="btn-add" onclick="addPack()">+ Añadir material</button>
+    </div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px">
+    <table class="tbl">
+      <thead><tr>
+        <th>Material</th><th>Unidad compra</th>
+        <th class="r">Precio</th><th class="r">Uds/cookie</th>
+        <th class="r">Coste batch</th><th class="r">€/cookie</th>
+        <th style="width:40px"></th>
+      </tr></thead>
+      <tbody id="tbody-pack"></tbody>
+    </table>
+  </div>
+
+  <!-- INDIRECTOS -->
+  <div class="sep-bar">
+    <div class="sep-title">⚡ Costes indirectos</div>
+    <div class="sep-total" id="sep-ind">€0.00</div>
+  </div>
+  <div class="card">
+    <div class="form-grid cols-2">
+      <div class="field">
+        <label>Energía (horno, mixer)</label>
+        <div class="iw"><input type="text" id="coste-energia" value="0.80" onkeydown="numOnly(event)" oninput="recalcAll()"><span class="iu">€/batch</span></div>
+      </div>
+      <div class="field">
+        <label>Mano de obra</label>
+        <div class="iw"><input type="text" id="coste-mo" value="0" onkeydown="numOnly(event)" oninput="recalcAll()"><span class="iu">€/cookie</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-strip">
+    <div class="kpi"><div class="kpi-label">Masa (MP)</div><div class="kv rosa" id="kpi-mp">—</div><div class="kpi-sub">total batch</div></div>
+    <div class="kpi"><div class="kpi-label">Dips</div><div class="kv naranja" id="kpi-dips">—</div><div class="kpi-sub">total batch</div></div>
+    <div class="kpi"><div class="kpi-label">Packaging</div><div class="kv amber" id="kpi-pack">—</div><div class="kpi-sub">total batch</div></div>
+    <div class="kpi"><div class="kpi-label">Coste/cookie</div><div class="kv verde" id="kpi-cookie-cost">—</div><div class="kpi-sub">todo incluido</div></div>
+  </div>
+</div>
+
+<!-- ══ TAB RENTABILIDAD ══ -->
+<div class="panel" id="panel-rent">
+  <div class="pvp-row">
+    <label>Precio de venta por cookie (PVP)</label>
+    <input type="text" id="pvp" value="4.50" onkeydown="numOnly(event)" oninput="recalcAll()">
+    <span class="suf">€ / ud</span>
+  </div>
+
+  <div class="margin-hero pos" id="margin-hero">
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-family:'Inter',sans-serif;margin-bottom:6px">Margen bruto por cookie</div>
+      <div class="hero-pct" id="hero-pct">—</div>
+      <div class="hero-label" id="hero-label">sobre precio de venta</div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-sublabel">Beneficio batch completo</div>
+      <div class="hero-bignum" id="hero-beneficio">—</div>
+      <div style="margin-top:8px" id="hero-badge"></div>
+    </div>
+  </div>
+
+  <div class="rent-grid">
+    <div class="rent-block">
+      <h3>Por cookie (unidad)</h3>
+      <div class="rr"><span class="rl">PVP</span><span class="rv" id="r-pvp">—</span></div>
+      <div class="rr"><span class="rl">— Materia prima masa</span><span class="rv neg" id="r-mp">—</span></div>
+      <div class="rr"><span class="rl">— Dips</span><span class="rv neg" id="r-dips">—</span></div>
+      <div class="rr"><span class="rl">— Packaging</span><span class="rv neg" id="r-pack">—</span></div>
+      <div class="rr"><span class="rl">— Mano de obra</span><span class="rv neg" id="r-mo">—</span></div>
+      <div class="rr"><span class="rl">— Energía</span><span class="rv neg" id="r-energia">—</span></div>
+      <div class="rr" style="border-top:2px solid var(--border);margin-top:4px;padding-top:10px">
+        <span class="rl" style="font-weight:700;color:var(--text)">Margen neto / cookie</span>
+        <span class="rv pos" id="r-margen">—</span>
+      </div>
+    </div>
+    <div class="rent-block">
+      <h3 id="batch-title">Batch completo</h3>
+      <div class="rr"><span class="rl">Ingresos totales</span><span class="rv" id="r-ingresos">—</span></div>
+      <div class="rr"><span class="rl">— Coste total</span><span class="rv neg" id="r-coste-total">—</span></div>
+      <div class="rr"><span class="rl">Beneficio bruto</span><span class="rv pos" id="r-beneficio">—</span></div>
+      <div class="rr"><span class="rl">Margen sobre ventas</span><span class="rv" id="r-margen-pct">—</span></div>
+      <div class="rr" style="border-top:2px solid var(--border);margin-top:4px;padding-top:10px">
+        <span class="rl">Break-even (precio mínimo)</span>
+        <span class="rv warn" id="r-breakeven">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Simulador de escenarios de precio</div>
+    <div id="scenarios"></div>
+  </div>
+</div>
+
+<!-- ══ TAB RECETARIO ══ -->
+<div class="panel" id="panel-recetario">
+
+  <!-- selector + actions -->
+  <div class="card" style="padding:16px 20px">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-family:'Inter',sans-serif;margin-bottom:6px">Receta activa</div>
+        <select id="rb-selector" onchange="rbLoad()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Syne',sans-serif;font-size:15px;font-weight:700;padding:10px 14px;outline:none;cursor:pointer">
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;padding-top:18px;flex-wrap:wrap">
+        <button class="btn-p" onclick="rbNew()">+ Nueva receta</button>
+        <button class="btn-s" onclick="rbEdit()">✏ Editar</button>
+        <button class="btn-s" id="rb-del-btn" onclick="rbDelete()" style="color:#ef4444;border-color:#fca5a5">🗑 Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- receta viewer -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+    <div class="rb-qty-row" style="margin-bottom:0">
+      <label>¿Cuánto vas a producir?</label>
+      <div class="mode-toggle" style="margin-right:4px">
+        <button class="mode-btn active" id="rb-mode-uds" onclick="setRbMode('uds')">Uds</button>
+        <button class="mode-btn" id="rb-mode-kg" onclick="setRbMode('kg')">Kg</button>
+      </div>
+      <input class="rb-qty-input" type="text" id="rb-qty" value="12" oninput="rbLoad()">
+      <span style="font-size:13px;color:var(--muted);font-family:'Inter',sans-serif" id="rb-qty-unit">uds</span>
+    </div>
+    <div class="rb-qty-row" style="margin-bottom:0">
+      <label>Peso por porción</label>
+      <input class="rb-qty-input" type="text" id="rb-peso" value="140" oninput="rbLoad()" style="width:80px">
+      <span style="font-size:13px;color:var(--muted);font-family:'Inter',sans-serif">g</span>
+    </div>
+  </div>
+  <div id="rb-viewer">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- modal nueva/editar receta -->
+  <div id="rb-modal" style="display:none;position:fixed;inset:0;background:rgba(17,24,39,0.4);z-index:200;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)">
+    <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.12)">
+      <div style="font-size:18px;font-weight:800;margin-bottom:20px;color:var(--text)" id="rb-modal-title">Nueva receta</div>
+
+      <!-- nombre + descripción -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div class="field" style="grid-column:1/-1">
+          <label>Nombre de la receta</label>
+          <input type="text" id="rb-nombre" placeholder="Ej. Doble Chocolate" class="rb-field">
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label>Descripción / perfil de sabor</label>
+          <input type="text" id="rb-desc" placeholder="Ej. Intensa, chocolateada, con chips de 70%" class="rb-field">
+        </div>
+      </div>
+
+      <!-- ingredientes -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-family:'Inter',sans-serif;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+        <span>Ingredientes</span>
+        <button class="btn-add" onclick="rbAddIng()">+ Añadir ingrediente</button>
+      </div>
+      <div id="rb-ings-list" style="margin-bottom:16px"></div>
+
+      <!-- notas técnica -->
+      <div class="field" style="margin-bottom:14px">
+        <label>Notas de técnica</label>
+        <textarea id="rb-tecnica" rows="3" placeholder="Ej. Mantequilla fría. Cremado 6 min. Cold rest 48h mínimo." class="rb-field" style="resize:vertical;line-height:1.6"></textarea>
+      </div>
+      <div class="field" style="margin-bottom:20px">
+        <label>Notas de horneado</label>
+        <textarea id="rb-horneado" rows="3" placeholder="Ej. 190°C convencional 14-16 min. Sacar con centro brillante." class="rb-field" style="resize:vertical;line-height:1.6"></textarea>
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <button class="btn-s" style="flex:1" onclick="rbCloseModal()">Cancelar</button>
+        <button class="btn-p" style="flex:2" onclick="rbSave()">Guardar receta</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ TAB FROSTINGS & DIPS ══ -->
+<div class="panel" id="panel-extras">
+
+  <!-- SELECTOR -->
+  <div class="card" style="padding:16px 20px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-family:'Inter',sans-serif;margin-bottom:6px">Preparación activa</div>
+        <select id="ex-selector" onchange="exLoad()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Syne',sans-serif;font-size:15px;font-weight:700;padding:10px 14px;outline:none;cursor:pointer"></select>
+      </div>
+      <div style="display:flex;gap:8px;padding-top:18px;flex-wrap:wrap">
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="ex-mode-uds" onclick="setExMode('uds')">Porciones</button>
+          <button class="mode-btn" id="ex-mode-g" onclick="setExMode('g')">Gramos</button>
+        </div>
+        <input class="rb-qty-input" type="text" id="ex-qty" value="12" oninput="exLoad()" style="width:80px">
+        <span style="font-size:13px;color:var(--muted);font-family:'Inter',sans-serif;padding-top:10px" id="ex-qty-unit">porciones</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="ex-viewer"></div>
+
+</div>
+
+<style>
+/* ── RECETARIO STYLES ── */
+.rb-field{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;padding:10px 13px;outline:none;transition:border-color .15s}
+.rb-field:focus{border-color:var(--rosa);box-shadow:0 0 0 3px rgba(247,37,133,0.08);background:#fff}
+.rb-ing-row{display:grid;grid-template-columns:1fr 90px 80px 36px;gap:8px;align-items:center;margin-bottom:8px}
+.rb-ing-row input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;padding:9px 11px;outline:none;width:100%;transition:border-color .15s}
+.rb-ing-row input:focus{border-color:var(--rosa)}
+.rb-ing-row select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'Inter',sans-serif;font-size:12px;padding:9px 8px;outline:none;width:100%}
+.rb-tag{display:inline-flex;align-items:center;background:var(--rosa-light);color:var(--rosa);border:1px solid rgba(247,37,133,0.2);border-radius:100px;font-size:11px;font-weight:700;padding:3px 10px;font-family:'Inter',sans-serif;letter-spacing:.03em}
+.rb-note-block{background:var(--surface2);border-left:3px solid var(--rosa);border-radius:0 10px 10px 0;padding:14px 16px;margin-bottom:10px}
+.rb-note-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-family:'Inter',sans-serif;margin-bottom:6px}
+.rb-note-text{font-size:13px;color:var(--text-mid);line-height:1.7;white-space:pre-wrap}
+.rb-ing-table{width:100%;border-collapse:collapse}
+.rb-ing-table th{padding:8px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface2);font-family:'Inter',sans-serif}
+.rb-ing-table th.r{text-align:right}
+.rb-ing-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid #f3f4f6;vertical-align:middle}
+.rb-ing-table tr:last-child td{border-bottom:none}
+.rb-ing-table td.r{text-align:right;font-family:'Inter',sans-serif;font-weight:600}
+.rb-ing-group td{background:#f3f4f6!important;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-family:'Inter',sans-serif;padding:6px 14px}
+.rb-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:6px}
+.rb-preset-card{background:#fff;border:2px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .15s;position:relative}
+.rb-preset-card:hover{border-color:var(--rosa);box-shadow:0 2px 12px rgba(247,37,133,0.1)}
+.rb-preset-card.active{border-color:var(--rosa);background:var(--rosa-light)}
+.rb-preset-name{font-size:14px;font-weight:700;margin-bottom:4px}
+.rb-preset-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.rb-preset-badge{position:absolute;top:10px;right:10px}
+
+
+/* ── UDS/KG TOGGLE ── */
+.mode-toggle{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px;gap:3px}
+.mode-btn{flex:1;padding:7px 14px;border:none;border-radius:6px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;color:var(--muted);background:none;letter-spacing:.03em}
+.mode-btn.active{background:#fff;color:var(--rosa);box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+
+/* ── RECETARIO PRODUCCIÓN ── */
+.rb-prod-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.rb-prod-kpi{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center}
+.rb-prod-kpi-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-family:'Inter',sans-serif;margin-bottom:4px}
+.rb-prod-kpi-val{font-size:20px;font-weight:800;color:var(--text);font-family:'Inter',sans-serif}
+.rb-prod-kpi-val.rosa{color:var(--rosa)}
+.rb-prod-kpi-val.verde{color:var(--verde)}
+.rb-qty-row{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:14px}
+.rb-qty-row label{font-size:12px;font-weight:700;color:var(--text);flex:1}
+.rb-qty-input{width:90px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--rosa);font-family:'Inter',sans-serif;font-size:20px;font-weight:800;padding:8px 10px;outline:none;text-align:center;transition:border-color .15s}
+.rb-qty-input:focus{border-color:var(--rosa)}
+.rb-step{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #f3f4f6}
+.rb-step:last-child{border-bottom:none}
+.rb-step-num{width:26px;height:26px;border-radius:50%;background:var(--rosa);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Inter',sans-serif;margin-top:1px}
+.rb-step-body{font-size:13px;color:var(--text);line-height:1.6;flex:1}
+.rb-step-body strong{color:var(--rosa);font-weight:700}
+.rb-step-body .rb-param{display:inline-block;background:var(--rosa-light);color:var(--rosa);border-radius:5px;padding:1px 7px;font-size:12px;font-weight:700;font-family:'Inter',sans-serif;margin:1px 2px}
+.rb-warn-step .rb-step-num{background:var(--naranja)}
+.rb-critical-step .rb-step-num{background:#ef4444}
+@media(max-width:600px){.rb-prod-strip{grid-template-columns:1fr 1fr}}
+</style>
+
+<script>
+// ─── RECETA BASE ───────────────────────────────────────────────
+const INGS = [
+  {g:'Húmedos',n:'Mantequilla sin sal (fría)',b:225,c:'#F72585',p:57.7,u:'kg',   apx:v=>`${v}g · ${(v/227).toFixed(2)} sticks`},
+  {g:'Húmedos',n:'Azúcar moreno (compacto)', b:180,c:'#FF7700',p:46.2,u:'kg',   apx:v=>`${v}g · ${(v/220).toFixed(1)} tazas`},
+  {g:'Húmedos',n:'Azúcar blanco granulado',  b:80, c:'#f59e0b',p:20.5,u:'kg',   apx:v=>`${v}g · ${(v/200).toFixed(1)} tazas`},
+  {g:'Húmedos',n:'Huevos L enteros',         b:116,c:'#e8a020',p:29.7,u:'docena',apx:v=>`${Math.round(v/58)} uds (${v}g)`},
+  {g:'Húmedos',n:'Extracto vainilla pura',   b:10, c:'#b45309',p:2.6, u:'ml',   apx:v=>`${v}ml · ${(v/5).toFixed(0)} cdtas`},
+  {g:'Secos',  n:'Harina de trigo (W170–200)',b:390,c:'#6366f1',p:100, u:'kg',   apx:v=>`${v}g · ${(v/122).toFixed(1)} tazas`},
+  {g:'Secos',  n:'Maizena (almidón de maíz)', b:12, c:'#0ea5e9',p:3.1, u:'kg',   apx:v=>`${v}g · ${(v/8).toFixed(1)} cdas`},
+  {g:'Secos',  n:'Bicarbonato sódico',        b:5,  c:'#ec4899',p:1.3, u:'kg',   apx:v=>`${v}g · ${(v/6).toFixed(1)} cdtas`},
+  {g:'Secos',  n:'Levadura química',          b:4,  c:'#a855f7',p:1.0, u:'kg',   apx:v=>`${v}g · ${(v/4).toFixed(1)} cdtas`},
+  {g:'Secos',  n:'Sal fina (Maldon molida)',  b:8,  c:'#64748b',p:2.1, u:'kg',   apx:v=>`${v}g · ${(v/6).toFixed(1)} cdtas`},
+  {g:'Mix-ins',n:'Chocolate negro 70% chunks',b:220,c:'#78350f',p:56.4,u:'kg',   apx:v=>`${v}g`},
+  {g:'Mix-ins',n:'Sal en escamas Maldon',     b:2,  c:'#94a3b8',p:0.5, u:'kg',   apx:v=>`${v}g · al gusto`},
+];
+const BASE_MASA = INGS.reduce((s,i)=>s+i.b,0);
+
+// ─── DYNAMIC STATE ─────────────────────────────────────────────
+let dips=[
+  {id:1,name:'Chocolate caliente',utype:'kg',price:0,gram:30},
+  {id:2,name:'Salted caramel',    utype:'kg',price:0,gram:30},
+];
+let packs=[
+  {id:1,name:'Caja/sleeve cookie',utype:'ud',price:0,qty:1},
+  {id:2,name:'Bolsa kraft',       utype:'ud',price:0,qty:1},
+];
+let dipId=10,packId=10;
+
+// ─── HELPERS ─────────────────────────────────────────────────────
+const fE=v=>'€'+Math.abs(v).toFixed(2);
+const fP=v=>v.toFixed(1)+'%';
+const fG=v=>v<10?v.toFixed(1)+'g':Math.round(v)+'g';
+const pf=v=>parseFloat(String(v||'').replace(',','.'))||0;
+
+// ── Mode state ──
+let recMode = 'uds'; // 'uds' | 'kg'
+let rbMode  = 'uds'; // 'uds' | 'kg'
+
+function setRecMode(mode){
+  recMode = mode;
+  document.getElementById('rec-mode-uds').classList.toggle('active', mode==='uds');
+  document.getElementById('rec-mode-kg').classList.toggle('active', mode==='kg');
+  const lbl  = document.getElementById('rec-label-qty');
+  const unit = document.getElementById('rec-unit-qty');
+  const presets = document.getElementById('rec-presets');
+  if(mode==='kg'){
+    lbl.textContent  = 'Kg de masa a producir';
+    unit.textContent = 'kg';
+    presets.style.display='none';
+    document.getElementById('num-cookies').value = '1.5';
+  } else {
+    lbl.textContent  = 'Nº de cookies a producir';
+    unit.textContent = 'uds';
+    presets.style.display='flex';
+    document.getElementById('num-cookies').value = '24';
+  }
+  recalcAll();
+}
+
+function setRbMode(mode){
+  rbMode = mode;
+  document.getElementById('rb-mode-uds').classList.toggle('active', mode==='uds');
+  document.getElementById('rb-mode-kg').classList.toggle('active', mode==='kg');
+  document.getElementById('rb-qty-unit').textContent = mode==='kg' ? 'kg' : 'uds';
+  document.getElementById('rb-qty').value = mode==='kg' ? '1' : '12';
+  // peso stays as-is — user may have customized it
+  rbLoad();
+}
+
+function params(){
+  const raw = pf(document.getElementById('num-cookies').value);
+  const pw  = pf(document.getElementById('peso-porcion').value)||130;
+  const mr  = (pf(document.getElementById('merma-pct').value)||0)/100;
+  // If kg mode: convert kg input → number of cookies
+  const n = recMode==='kg'
+    ? Math.round((raw * 1000) / pw) || 1
+    : (parseInt(document.getElementById('num-cookies').value)||24);
+  const mu=n*pw, mt=mu/(1-mr), f=mt/BASE_MASA;
+  return{n,pw,mr,mu,mt,f};
+}
+
+const UNITS=[
+  {v:'kg',l:'€/kg'},{v:'500g',l:'€/500g'},{v:'250g',l:'€/250g'},{v:'100g',l:'€/100g'},
+  {v:'l',l:'€/litro'},{v:'ml',l:'€/100ml'},{v:'ud',l:'€/unidad'},{v:'docena',l:'€/docena'}
+];
+
+function costCalc(grams,utype,price){
+  if(!price) return 0;
+  const m={kg:1000,'500g':500,'250g':250,'100g':100,l:1000,ml:100,ud:58,docena:58*12};
+  return(grams/(m[utype]||1000))*price;
+}
+
+// ─── RENDER RECIPE (solo una vez o al cambiar parámetros) ────────
+function renderRecipe(){
+  const{n,pw,f,mt}=params();
+  document.getElementById('kpi-cookies').textContent=n;
+  document.getElementById('kpi-masa-total').textContent=Math.round(mt)+'g';
+  document.getElementById('kpi-factor').textContent='×'+f.toFixed(2);
+  document.getElementById('kpi-peso-horneado').textContent=Math.round(pw*0.84)+'g';
+
+  let html='',lg='',tb=0,ts=0;
+  INGS.forEach(ing=>{
+    if(ing.g!==lg){
+      const L={Húmedos:'Ingredientes húmedos',Secos:'Ingredientes secos','Mix-ins':'Mix-ins'};
+      html+=`<tr class="gr"><td colspan="5">${L[ing.g]}</td></tr>`;lg=ing.g;
+    }
+    const sc=Math.round(ing.b*f*10)/10; tb+=ing.b; ts+=sc;
+    html+=`<tr>
+      <td><div class="nc"><span class="dot" style="background:${ing.c}"></span>${ing.n}</div></td>
+      <td class="r" style="color:var(--muted)">${ing.b}g</td>
+      <td class="r" style="font-size:16px;font-weight:700;font-family:'Inter',sans-serif">${fG(sc)}</td>
+      <td class="r" style="color:var(--muted);font-size:12px">${ing.apx(sc)}</td>
+      <td class="r" style="color:var(--muted2)">${ing.p}%</td>
+    </tr>`;
+  });
+  html+=`<tr class="tr-total"><td>MASA TOTAL</td><td class="r">${Math.round(tb)}g</td><td class="r">${Math.round(ts)}g</td><td class="r" style="font-size:12px;color:var(--muted)">bruto incl. merma</td><td></td></tr>`;
+  document.getElementById('recipe-tbody').innerHTML=html;
+}
+
+// ─── INIT TABLA MASA (solo estructura, una vez) ──────────────────
+function initMasaTable(){
+  let html='';
+  INGS.forEach((ing,i)=>{
+    html+=`<tr id="masa-row-${i}">
+      <td><div class="nc"><span class="dot" style="background:${ing.c}"></span>${ing.n}</div></td>
+      <td><select class="unit-sel" id="mp-u-${i}" onchange="calcOnly()">${UNITS.map(o=>`<option value="${o.v}"${o.v===ing.u?' selected':''}>${o.l}</option>`).join('')}</select></td>
+      <td class="r"><input class="num-input" type="text" id="mp-p-${i}" value="" placeholder="0.00" oninput="calcOnly()"></td>
+      <td class="r" id="mp-cant-${i}" style="color:var(--muted)">—</td>
+      <td class="r" id="mp-cost-${i}">—</td>
+      <td class="r" id="mp-cpc-${i}" style="color:var(--muted)">—</td>
+    </tr>`;
+  });
+  html+=`<tr class="tr-sub" id="masa-subtotal-row">
+    <td colspan="4" style="color:var(--text);font-size:13px">SUBTOTAL MASA</td>
+    <td class="r" id="mp-total" style="color:var(--rosa)">—</td>
+    <td class="r" id="mp-total-pc" style="color:var(--muted)">—</td>
+  </tr>`;
+  document.getElementById('tbody-masa').innerHTML=html;
+}
+
+// ─── INIT TABLA DIPS ─────────────────────────────────────────────
+function initDipsTable(){
+  if(!dips.length){
+    document.getElementById('tbody-dips').innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--muted2);padding:24px;font-size:12px">Sin dips registrados — añade uno con el botón +</td></tr>`;
+    return;
+  }
+  let html='';
+  dips.forEach(d=>{
+    html+=`<tr id="dip-row-${d.id}">
+      <td><input type="text" id="dp-n-${d.id}" class="row-input" value="${d.name}" placeholder="Nombre del dip" oninput="calcOnly()"></td>
+      <td><select class="unit-sel" id="dp-u-${d.id}" onchange="calcOnly()">${UNITS.map(o=>`<option value="${o.v}"${o.v===d.utype?' selected':''}>${o.l}</option>`).join('')}</select></td>
+      <td class="r"><input class="num-input" type="text" id="dp-p-${d.id}" value="${d.price||''}" placeholder="0.00" oninput="calcOnly()"></td>
+      <td class="r"><div style="display:flex;align-items:center;justify-content:flex-end;gap:6px"><input class="num-input" style="width:72px" type="text" id="dp-g-${d.id}" value="${d.gram||30}" oninput="calcOnly()"><span style="font-size:11px;color:var(--muted2)">g</span></div></td>
+      <td class="r" id="dp-cost-${d.id}">—</td>
+      <td class="r" id="dp-cpc-${d.id}" style="color:var(--muted)">—</td>
+      <td><button class="btn-del" onclick="removeDip(${d.id})">✕</button></td>
+    </tr>`;
+  });
+  html+=`<tr class="tr-sub"><td colspan="4" style="color:var(--text);font-size:13px">SUBTOTAL DIPS</td><td class="r" id="dips-total" style="color:var(--rosa)">—</td><td class="r" id="dips-total-pc" style="color:var(--muted)">—</td><td></td></tr>`;
+  document.getElementById('tbody-dips').innerHTML=html;
+}
+
+// ─── INIT TABLA PACKAGING ─────────────────────────────────────────
+function initPackTable(){
+  if(!packs.length){
+    document.getElementById('tbody-pack').innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--muted2);padding:24px;font-size:12px">Sin materiales — añade uno con el botón +</td></tr>`;
+    return;
+  }
+  let html='';
+  packs.forEach(pk=>{
+    html+=`<tr id="pack-row-${pk.id}">
+      <td><input type="text" id="pk-n-${pk.id}" class="row-input" value="${pk.name}" placeholder="Caja, bolsa, sleeve..." oninput="calcOnly()"></td>
+      <td><select class="unit-sel" id="pk-u-${pk.id}" onchange="calcOnly()">${UNITS.map(o=>`<option value="${o.v}"${o.v===pk.utype?' selected':''}>${o.l}</option>`).join('')}</select></td>
+      <td class="r"><input class="num-input" type="text" id="pk-p-${pk.id}" value="${pk.price||''}" placeholder="0.00" oninput="calcOnly()"></td>
+      <td class="r"><div style="display:flex;align-items:center;justify-content:flex-end;gap:6px"><input class="num-input" style="width:72px" type="text" id="pk-q-${pk.id}" value="${pk.qty||1}" oninput="calcOnly()"><span style="font-size:11px;color:var(--muted2)">uds</span></div></td>
+      <td class="r" id="pk-cost-${pk.id}">—</td>
+      <td class="r" id="pk-cpc-${pk.id}" style="color:var(--muted)">—</td>
+      <td><button class="btn-del" onclick="removePack(${pk.id})">✕</button></td>
+    </tr>`;
+  });
+  html+=`<tr class="tr-sub"><td colspan="4" style="color:var(--text);font-size:13px">SUBTOTAL PACKAGING</td><td class="r" id="pack-total" style="color:var(--rosa)">—</td><td class="r" id="pack-total-pc" style="color:var(--muted)">—</td><td></td></tr>`;
+  document.getElementById('tbody-pack').innerHTML=html;
+}
+
+// ─── CALC ONLY: actualiza outputs sin tocar inputs ────────────────
+function calcOnly(){
+  const{n,f}=params();
+
+  // — masa —
+  let totalMasa=0;
+  INGS.forEach((ing,i)=>{
+    const sc=ing.b*f;
+    const p=pf(document.getElementById(`mp-p-${i}`)?.value);
+    const u=document.getElementById(`mp-u-${i}`)?.value||ing.u;
+    const cost=costCalc(sc,u,p);
+    totalMasa+=cost;
+    const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+    set(`mp-cant-${i}`, fG(sc));
+    set(`mp-cost-${i}`, cost>0?fE(cost):'—');
+    set(`mp-cpc-${i}`,  cost>0&&n>0?fE(cost/n):'—');
+  });
+  const setEl=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  setEl('mp-total',   fE(totalMasa));
+  setEl('mp-total-pc', n>0?fE(totalMasa/n):'—');
+  setEl('sep-masa',   fE(totalMasa));
+  setEl('kpi-mp',     fE(totalMasa));
+
+  // — dips —
+  let totalDips=0;
+  dips.forEach(d=>{
+    const p=pf(document.getElementById(`dp-p-${d.id}`)?.value);
+    const u=document.getElementById(`dp-u-${d.id}`)?.value||d.utype;
+    const g=pf(document.getElementById(`dp-g-${d.id}`)?.value)||d.gram||30;
+    const cost=costCalc(g*n,u,p);
+    totalDips+=cost;
+    setEl(`dp-cost-${d.id}`, cost>0?fE(cost):'—');
+    setEl(`dp-cpc-${d.id}`,  cost>0&&n>0?fE(cost/n):'—');
+  });
+  setEl('dips-total',    fE(totalDips));
+  setEl('dips-total-pc', n>0?fE(totalDips/n):'—');
+  setEl('sep-dips',      fE(totalDips));
+  setEl('kpi-dips',      fE(totalDips));
+
+  // — packaging —
+  let totalPack=0;
+  packs.forEach(pk=>{
+    const p=pf(document.getElementById(`pk-p-${pk.id}`)?.value);
+    const u=document.getElementById(`pk-u-${pk.id}`)?.value||pk.utype;
+    const qty=pf(document.getElementById(`pk-q-${pk.id}`)?.value)||pk.qty||1;
+    const div={ud:1,docena:12,kg:1000,'500g':500,'250g':250,'100g':100,l:1000,ml:100};
+    const ppu=p/(div[u]||1);
+    const costC=qty*ppu, costB=costC*n;
+    totalPack+=costB;
+    setEl(`pk-cost-${pk.id}`, costB>0?fE(costB):'—');
+    setEl(`pk-cpc-${pk.id}`,  costC>0?fE(costC):'—');
+  });
+  setEl('pack-total',    fE(totalPack));
+  setEl('pack-total-pc', n>0?fE(totalPack/n):'—');
+  setEl('sep-pack',      fE(totalPack));
+  setEl('kpi-pack',      fE(totalPack));
+
+  // — indirectos —
+  const en=pf(document.getElementById('coste-energia').value);
+  const mo=pf(document.getElementById('coste-mo').value);
+  const indB=en+mo*n;
+  setEl('sep-ind', fE(indB));
+
+  // — rentabilidad —
+  const pvp=pf(document.getElementById('pvp').value);
+  const totB=totalMasa+totalDips+totalPack+indB;
+  const cc=n>0?totB/n:0, mc=pvp-cc, mp=pvp>0?(mc/pvp)*100:0;
+  const ing=pvp*n, ben=ing-totB;
+
+  setEl('kpi-cookie-cost', fE(cc));
+
+  const pos=mc>=0;
+  const hero=document.getElementById('margin-hero');
+  if(hero) hero.className='margin-hero '+(pos?'pos':'neg');
+  const hp=document.getElementById('hero-pct');
+  if(hp){hp.textContent=fP(Math.abs(mp));hp.style.color=pos?'var(--verde)':'var(--rosa)';}
+  const hl=document.getElementById('hero-label');
+  if(hl) hl.textContent=pos?'margen sobre precio de venta':'PÉRDIDA sobre precio de venta';
+  const hb=document.getElementById('hero-beneficio');
+  if(hb){hb.textContent=(ben>=0?'+':'-')+fE(Math.abs(ben));hb.style.color=ben>=0?'var(--verde)':'var(--rosa)';}
+  const hbadge=document.getElementById('hero-badge');
+  if(hbadge) hbadge.innerHTML=mp>60?'<span class="badge b-ok">Excelente</span>':mp>40?'<span class="badge b-ok">Bueno</span>':mp>20?'<span class="badge b-warn">Ajustado</span>':mp>0?'<span class="badge b-warn">Bajo</span>':'<span class="badge b-bad">Pérdida</span>';
+
+  setEl('r-pvp',fE(pvp));
+  setEl('r-mp','-'+fE(n>0?totalMasa/n:0));
+  setEl('r-dips','-'+fE(n>0?totalDips/n:0));
+  setEl('r-pack','-'+fE(n>0?totalPack/n:0));
+  setEl('r-mo','-'+fE(mo));
+  setEl('r-energia','-'+fE(n>0?en/n:0));
+  const rm=document.getElementById('r-margen');
+  if(rm){rm.textContent=(mc>=0?'+':'')+fE(mc);rm.className='rv '+(mc>=0?'pos':'neg');}
+  setEl('batch-title',`Batch completo (${n} cookies)`);
+  setEl('r-ingresos',fE(ing));
+  setEl('r-coste-total','-'+fE(totB));
+  const rb=document.getElementById('r-beneficio');
+  if(rb){rb.textContent=(ben>=0?'+':'-')+fE(Math.abs(ben));rb.className='rv '+(ben>=0?'pos':'neg');}
+  const rmp=document.getElementById('r-margen-pct');
+  if(rmp){rmp.textContent=fP(mp);rmp.className='rv '+(mp>30?'pos':mp>0?'warn':'neg');}
+  setEl('r-breakeven',fE(cc));
+
+  // Scenarios
+  const pvps=[pvp*0.7,pvp*0.85,pvp,pvp*1.15,pvp*1.3].filter(v=>v>0);
+  let sc=`<table class="tbl"><thead><tr><th>PVP/cookie</th><th class="r">Ingresos</th><th class="r">Beneficio</th><th class="r">Margen</th><th class="r">Valoración</th></tr></thead><tbody>`;
+  pvps.forEach(pp=>{
+    const b=pp*n-totB, mpp=pp>0?(b/(pp*n))*100:0, act=Math.abs(pp-pvp)<0.001;
+    const col=b>0?(mpp>40?'var(--verde)':'var(--amarillo)'):'var(--rosa)';
+    sc+=`<tr style="${act?'background:var(--rosa-light)':''}">
+      <td style="font-weight:${act?'800':'600'};color:${act?'var(--rosa)':'var(--text)'}">${fE(pp)}${act?' ← actual':''}</td>
+      <td class="r">${fE(pp*n)}</td>
+      <td class="r" style="color:${col};font-weight:700">${(b>=0?'+':'-')+fE(Math.abs(b))}</td>
+      <td class="r" style="color:${col};font-weight:700">${fP(mpp)}</td>
+      <td class="r">${mpp>60?'<span class="badge b-ok">Excelente</span>':mpp>40?'<span class="badge b-ok">Bueno</span>':mpp>20?'<span class="badge b-warn">Ajustado</span>':mpp>0?'<span class="badge b-warn">Bajo</span>':'<span class="badge b-bad">Pérdida</span>'}</td>
+    </tr>`;
+  });
+  sc+='</tbody></table>';
+  setEl('scenarios',sc);
+}
+
+// ─── RECALC ALL: re-init tablas + calcular ────────────────────────
+function recalcAll(){
+  renderRecipe();
+  initMasaTable();
+  initDipsTable();
+  initPackTable();
+  calcOnly();
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────────────
+function addDip(){
+  dips.push({id:++dipId,name:'Nuevo dip',utype:'kg',price:0,gram:30});
+  initDipsTable(); calcOnly();
+}
+function removeDip(id){
+  dips=dips.filter(d=>d.id!==id);
+  initDipsTable(); calcOnly();
+}
+function addPack(){
+  packs.push({id:++packId,name:'Nuevo material',utype:'ud',price:0,qty:1});
+  initPackTable(); calcOnly();
+}
+function removePack(id){
+  packs=packs.filter(p=>p.id!==id);
+  initPackTable(); calcOnly();
+}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+}
+function setPreset(n,p){
+  document.getElementById('num-cookies').value=n;
+  document.getElementById('peso-porcion').value=p;
+  recalcAll();
+}
+
+recalcAll();
+
+// ══════════════════════════════════════════════════════════════
+// RECETARIO
+// ══════════════════════════════════════════════════════════════
+
+const UNIDADES_ING = ['g','kg','ml','l','uds','cdtas','cdas','tazas','pizca'];
+
+let recetas = [
+  {
+    id:'dopi-clasica', nombre:'Cookie Clásica — vB4',
+    desc:'Chocolate 70%, exterior crujiente, centro ultra-chewy. Perfil adulto y equilibrado, no empalagoso.',
+    preset:true,
+    ings:[
+      {grupo:'Húmedos',nombre:'Mantequilla sin sal (fría, cubos 2cm)',cantidad:225,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar moreno (compacto)',cantidad:170,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar blanco granulado',cantidad:80,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Huevos L enteros',cantidad:2,unidad:'uds'},
+      {grupo:'Húmedos',nombre:'Extracto de vainilla pura',cantidad:10,unidad:'ml'},
+      {grupo:'Secos',nombre:'Harina de trigo (W170–200)',cantidad:400,unidad:'g'},
+      {grupo:'Secos',nombre:'Bicarbonato sódico',cantidad:5,unidad:'g'},
+      {grupo:'Secos',nombre:'Levadura química',cantidad:4,unidad:'g'},
+      {grupo:'Secos',nombre:'Sal fina (Maldon molida)',cantidad:8,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Chocolate negro 70% chunks',cantidad:220,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Sal en escamas Maldon (acabado)',cantidad:2,unidad:'g'},
+    ],
+    tecnica:'Mantequilla fría en cubos (4–8°C), NUNCA a temperatura ambiente.\nCremado KitchenAid pala plana: vel.2 1min → vel.4 3min → vel.6 2min. Resultado arenoso, NO cremoso.\nHuevos uno a uno vel.2, luego la vainilla. Vel.4 45seg. Raspar paredes.\nHarina+maizena vel.1 mínima 30–45seg. PARAR al integrar.\nChocolate a mano con espátula, 10–15 pliegues.\nCold rest nevera mínimo 24h, óptimo 48–72h.',
+    horneado:'Porciones 140g, bolas altas (más alta que ancha).\nConvencional: 185°C 18–22min. Ventilado: 170°C 18–22min.\nSeñal: bordes dorados y mate, centro brillante y underdone.\nReposar 10min en bandeja antes de mover. Sal en escamas al sacar.'
+  },
+  {
+    id:'dopi-red-velvet', nombre:'Red Velvet — vB4',
+    desc:'Masa de cacao suave con colorante rojo y chocolate blanco. Sin buttermilk. Perfil clásico americano equilibrado.',
+    preset:true,
+    ings:[
+      {grupo:'Húmedos',nombre:'Mantequilla sin sal (fría, cubos 2cm)',cantidad:225,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar moreno (compacto)',cantidad:150,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar blanco granulado',cantidad:75,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Huevos L enteros',cantidad:2,unidad:'uds'},
+      {grupo:'Húmedos',nombre:'Extracto de vainilla pura',cantidad:10,unidad:'ml'},
+      {grupo:'Húmedos',nombre:'Colorante rojo gel (Americolor Super Red)',cantidad:8,unidad:'g'},
+      {grupo:'Secos',nombre:'Harina de trigo (W170–200)',cantidad:394,unidad:'g'},
+      {grupo:'Secos',nombre:'Cacao en polvo suave (NO alcalinizado)',cantidad:10,unidad:'g'},
+      {grupo:'Secos',nombre:'Bicarbonato sódico',cantidad:5,unidad:'g'},
+      {grupo:'Secos',nombre:'Levadura química',cantidad:4,unidad:'g'},
+      {grupo:'Secos',nombre:'Sal fina (Maldon molida)',cantidad:7,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Chocolate blanco chunks',cantidad:180,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Sal en escamas Maldon (acabado)',cantidad:2,unidad:'g'},
+    ],
+    tecnica:'Técnica base igual que Clásica.\nColorante en gel al final del cremado, antes de la harina — vel.2 hasta color uniforme, máx 30seg.\nUSAR solo gel alta concentración (Americolor Super Red). El colorante líquido altera la textura.\nCacao SUAVE no alcalinizado — el cacao oscuro anula el color rojo.\nCold rest mínimo 24h.',
+    horneado:'Convencional: 170°C 18–22min. Ventilado: 165°C 18–22min. Temperatura reducida para mantener los chips de chocolate blanco sin caramelizar.\nSin referencia visual de dorado por el color oscuro — fijarse en bordes secos y firmes.\nEl color rojo intenso se aprecia al corte en frío.'
+  },
+  {
+    id:'dopi-brownie', nombre:'Brownie Cookie — vB4',
+    desc:'Textura densa y fudgy tipo brownie, corteza crujiente y centro fundente. Sin levadura. Proceso diferente al resto.',
+    preset:true,
+    ings:[
+      {grupo:'Húmedos',nombre:'Mantequilla sin sal (fundida y enfriada a 40°C)',cantidad:170,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Chocolate negro 70% (fundido y enfriado a 40°C)',cantidad:170,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar blanco granulado',cantidad:80,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar moreno',cantidad:150,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Huevos L enteros',cantidad:3,unidad:'uds'},
+      {grupo:'Húmedos',nombre:'Extracto de vainilla pura',cantidad:10,unidad:'ml'},
+      {grupo:'Secos',nombre:'Harina de trigo (todo uso)',cantidad:220,unidad:'g'},
+      {grupo:'Secos',nombre:'Cacao en polvo sin azúcar (Valrhona)',cantidad:30,unidad:'g'},
+      {grupo:'Secos',nombre:'Sal fina',cantidad:5,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Chocolate negro 70% chips o chunks',cantidad:150,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Sal en escamas Maldon (acabado)',cantidad:2,unidad:'g'},
+    ],
+    tecnica:'⚠ PROCESO COMPLETAMENTE DISTINTO AL RESTO — leer con atención.\nFundir juntos mantequilla + chocolate a baño María. Enfriar a ~40°C.\nMezclar manualmente con ambos azúcares hasta integrar.\nAñadir 3 huevos uno a uno + vainilla, batir 3 min a vel.3 — mezcla brillante y espesa.\nTamizar harina + cacao + sal, incorporar con espátula en 3 adiciones, 15–20 pliegues.\nChips/chunks a mano, 10 pliegues.\nCold rest nevera mínimo 2h (preferible 4h). La masa se endurece — es normal.\n⚠ SIN LEVADURA NI BICARBONATO — no añadir bajo ningún concepto.',
+    horneado:'Convencional: 175°C 16–20min. Ventilado: 160°C 16–20min.\nSeñal: corteza mate con pequeñas grietas, borde firme, centro todavía húmedo.\nEsta cookie es más plana que el resto — es característica de la receta, no un defecto.'
+  },
+  {
+    id:'dopi-chocolate', nombre:'Cookie Chocolate — vB4',
+    desc:'Mix de chips 54% y chunks 70%. Mayor ratio azúcar moreno. Textura perfecta, sabor profundo.',
+    preset:true,
+    ings:[
+      {grupo:'Húmedos',nombre:'Mantequilla sin sal (fría, cubos 2cm)',cantidad:225,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar moreno (compacto)',cantidad:143,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar blanco granulado',cantidad:77,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Huevos L enteros',cantidad:2,unidad:'uds'},
+      {grupo:'Húmedos',nombre:'Extracto de vainilla pura (doble concentración)',cantidad:15,unidad:'ml'},
+      {grupo:'Secos',nombre:'Harina de trigo (W170–200)',cantidad:388,unidad:'g'},
+      {grupo:'Secos',nombre:'Maizena (almidón de maíz)',cantidad:14,unidad:'g'},
+      {grupo:'Secos',nombre:'Bicarbonato sódico',cantidad:5,unidad:'g'},
+      {grupo:'Secos',nombre:'Levadura química',cantidad:4,unidad:'g'},
+      {grupo:'Secos',nombre:'Sal fina (Maldon molida)',cantidad:9,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Chips chocolate semi-amargo 54% (Callebaut)',cantidad:120,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Chunks chocolate negro 70%',cantidad:120,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Sal en escamas Maldon (acabado)',cantidad:2,unidad:'g'},
+    ],
+    tecnica:'Misma técnica base que Clásica.\nMix de chips + chunks es intencional — los chips se funden en la masa y los chunks crean bolsas visibles.\nNO sustituir ambos formatos por uno solo — cambia significativamente la textura.\nVainilla en doble concentración: no reducir.\nCold rest mínimo 48h — esta receta mejora notablemente con 72h.',
+    horneado:'Convencional: 185°C 18–22min. Ventilado: 170°C 18–22min.\nMismas señales que la Clásica: bordes dorados y mate, centro brillante.'
+  },
+  {
+    id:'dopi-limon', nombre:'Limón & Chocolate Blanco — vB4',
+    desc:'Cítrico suave y equilibrado con fondo de mantequilla y chocolate blanco. Perfil fresco y adulto.',
+    preset:true,
+    ings:[
+      {grupo:'Húmedos',nombre:'Mantequilla sin sal (fría, cubos 2cm)',cantidad:225,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar moreno (compacto)',cantidad:130,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar blanco granulado',cantidad:70,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Huevos L enteros',cantidad:2,unidad:'uds'},
+      {grupo:'Húmedos',nombre:'Extracto de vainilla pura',cantidad:5,unidad:'ml'},
+      {grupo:'Húmedos',nombre:'Ralladura de limón (limones frescos)',cantidad:12,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Zumo de limón natural (colado)',cantidad:20,unidad:'ml'},
+      {grupo:'Secos',nombre:'Harina de trigo (W170–200)',cantidad:390,unidad:'g'},
+      {grupo:'Secos',nombre:'Maizena (almidón de maíz)',cantidad:10,unidad:'g'},
+      {grupo:'Secos',nombre:'Bicarbonato sódico',cantidad:5,unidad:'g'},
+      {grupo:'Secos',nombre:'Levadura química',cantidad:4,unidad:'g'},
+      {grupo:'Secos',nombre:'Sal fina (Maldon molida)',cantidad:9,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Chocolate blanco chunks (Callebaut W2)',cantidad:160,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Sal en escamas Maldon (acabado)',cantidad:2,unidad:'g'},
+    ],
+    tecnica:'Ralladura de limón: solo parte amarilla, NUNCA la blanca (amarga). Rallar antes de exprimir.\nMisma técnica base que Clásica.\nAñadir ralladura y zumo con la vainilla — el zumo puede hacer la mezcla parecer cortada, es normal.\nCold rest mínimo 48h — el limón necesita tiempo para integrarse.',
+    horneado:'Convencional: 183°C 17–21min. Ventilado: 168°C 17–21min.\nSeñal: bordes dorados y mate, centro todavía brillante.\nSal en escamas al sacar — potencia el contraste dulce-cítrico-salado.'
+  },
+  {
+    id:'dopi-doble-chocolate', nombre:'Doble Chocolate — vB4',
+    desc:'Masa de cacao intenso con chunks de chocolate negro y blanco. Interior fudgy.',
+    preset:true,
+    ings:[
+      {grupo:'Húmedos',nombre:'Mantequilla sin sal (fría, cubos 2cm)',cantidad:225,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar moreno (compacto)',cantidad:137,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar blanco granulado',cantidad:73,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Huevos L enteros',cantidad:2,unidad:'uds'},
+      {grupo:'Húmedos',nombre:'Extracto de vainilla pura',cantidad:8,unidad:'ml'},
+      {grupo:'Secos',nombre:'Harina de trigo (W170–200)',cantidad:358,unidad:'g'},
+      {grupo:'Secos',nombre:'Cacao en polvo sin azúcar (Valrhona)',cantidad:45,unidad:'g'},
+      {grupo:'Secos',nombre:'Bicarbonato sódico',cantidad:5,unidad:'g'},
+      {grupo:'Secos',nombre:'Levadura química',cantidad:3,unidad:'g'},
+      {grupo:'Secos',nombre:'Sal fina (Maldon molida)',cantidad:8,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Chocolate negro 70% chunks',cantidad:130,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Chocolate blanco chunks',cantidad:100,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Sal en escamas Maldon (acabado)',cantidad:2,unidad:'g'},
+    ],
+    tecnica:'Misma técnica base que Clásica.\nTamizar el cacao obligatoriamente — los grumos no desaparecen al hornear.\nLa masa oscura dificulta ver el cremado — controlar por tiempo, no por color.\nCold rest mínimo 24h (preferible 48h).',
+    horneado:'Convencional: 178°C 18–22min. Ventilado: 163°C 18–22min.\nLa masa negra dificulta ver el dorado — controlar por tiempo y tacto en el borde.\nInterior más fudgy y denso que la Clásica — es el resultado esperado.'
+  },
+  {
+    id:'dopi-fries-clasica', nombre:'Cookie Fries — Clásica',
+    desc:'Formato plano tipo patata frita. Exterior crujiente, estructura firme para untar. Sin levadura, sin maizena. Base chocolate negro.',
+    preset:true,
+    ings:[
+      {grupo:'Húmedos',nombre:'Mantequilla sin sal (FRÍA en cubos 2cm)',cantidad:200,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar blanco granulado',cantidad:110,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar moreno (compacto)',cantidad:80,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Huevos L enteros',cantidad:2,unidad:'uds'},
+      {grupo:'Húmedos',nombre:'Extracto de vainilla pura',cantidad:8,unidad:'ml'},
+      {grupo:'Secos',nombre:'Harina de trigo (W170–200)',cantidad:400,unidad:'g'},
+      {grupo:'Secos',nombre:'Levadura química',cantidad:3,unidad:'g'},
+      {grupo:'Secos',nombre:'Bicarbonato sódico',cantidad:4,unidad:'g'},
+      {grupo:'Secos',nombre:'Sal fina (Maldon molida)',cantidad:8,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Chocolate negro 70% chips (no chunks)',cantidad:120,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Sal en escamas Maldon (acabado)',cantidad:2,unidad:'g'},
+    ],
+    tecnica:'MANTEQUILLA FRIA EN CUBOS — directamente de nevera, cubos de 2cm. Fria es clave para el crujiente — controla la expansion en horno. NO a temperatura ambiente para este formato.\\n\\nAZUCARES ratio invertido: 65% blanco / 35% moreno. El blanco carameliza y da rigidez al enfriarse.\\nSIN LEVADURA ni MAIZENA.\\nCHIPS EN SUPERFICIE DESPUES DE EXTENDER — nunca en la masa. Los chips en la masa impiden extender bien.\\n\\nPROCESO:\\nPaso 1: Cremar mantequilla pomada + azucares pala plana vel.4 → 2min maximo. Mezcla homogenea y suave. No airear — mas tiempo hace la masa esponjosa.\\nPaso 2: Huevos uno a uno vel.2, luego vainilla. Vel.4 → 30seg.\\nPaso 3: Harina + bicarbonato + sal vel.1 → 45seg. Masa limpia SIN CHIPS.\\nPaso 4: Cold rest nevera minimo 1h.\\n\\nMETODO A — lamina cortada (local):\\nPaso 5: Extender masa entre dos papeles de horno con rodillo a 10-11mm exacto. Usar listones guia de igual grosor a ambos lados.\\nPaso 6: Nevera 15-20min hasta que la lamina este firme.\\nPaso 7: Repartir chips o chunks partidos en superficie y presionar suavemente con la palma — solo incrustar, no aplanar mas.\\nPaso 8: Cortar rectangulos 8x3cm con cuchillo largo sin mover las piezas.\\nPaso 9: Congelar en bandeja plana 2h hasta solidas. Embolsar con papel entre capas.\\n\\nMETODO B — rulo (obrador):\\nPaso 5: Formar rulo de masa limpia SIN CHIPS, 10cm ancho x 3cm alto. Envolver en film apretado. Congelar 3h hasta solido.\\nPaso 6: Cortar lonchas 10-11mm desde congelado con cuchillo de sierra.\\nPaso 7: Presionar chips o chunks en superficie de cada loncha ya cortada.\\nPaso 8: Recongelar 30min. Embolsar con papel entre capas.\\n\\nOPCION PREMIUM: chocolate picado grueso o chunks partidos a la mitad en superficie. Mas impacto visual y mas chocolate por mordisco.',
+horneado:'HORNEAR SIEMPRE DESDE CONGELADO — nunca descongelar antes.\nConvencional: 160°C 20-25 min. Ventilado: 150°C 18-22 min.\nTemperatura baja y tiempo largo — deshidrata lentamente sin quemar el exterior.\nSenal de punto: superficie mate y dorada uniforme, bordes ligeramente mas oscuros, aspecto seco.\nDEJAR ENFRIAR COMPLETAMENTE EN BANDEJA antes de mover o servir. El crujiente se desarrolla al enfriarse. En caliente la pieza se dobla y rompe.\nServir siempre frio o temperatura ambiente. El dip va separado para mojar, no para untar directo.'
+  }
+,
+  {
+    id:'dopi-fries-redvelvet', nombre:'Cookie Fries — Red Velvet',
+    desc:'Masa rojo-rosada equilibrada, no intensa. Cacao suave en fondo. Chocolate blanco en superficie. Crujiente tipo patata.',
+    preset:true,
+    ings:[
+      {grupo:'Húmedos',nombre:'Mantequilla sin sal (FRÍA en cubos 2cm)',cantidad:200,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar blanco granulado',cantidad:110,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar moreno (compacto)',cantidad:80,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Huevos L enteros',cantidad:2,unidad:'uds'},
+      {grupo:'Húmedos',nombre:'Extracto de vainilla pura',cantidad:8,unidad:'ml'},
+      {grupo:'Húmedos',nombre:'Colorante rojo gel (Americolor Super Red)',cantidad:4,unidad:'g'},
+      {grupo:'Secos',nombre:'Harina de trigo (W170–200)',cantidad:401,unidad:'g'},
+      {grupo:'Secos',nombre:'Cacao en polvo suave (NO alcalinizado)',cantidad:6,unidad:'g'},
+      {grupo:'Secos',nombre:'Levadura química',cantidad:3,unidad:'g'},
+      {grupo:'Secos',nombre:'Bicarbonato sódico',cantidad:4,unidad:'g'},
+      {grupo:'Secos',nombre:'Sal fina (Maldon molida)',cantidad:8,unidad:'g'},
+      {grupo:'Superficie',nombre:'Chocolate blanco chunks (Callebaut W2) — en superficie',cantidad:100,unidad:'g'},
+      {grupo:'Superficie',nombre:'Sal en escamas Maldon (acabado)',cantidad:2,unidad:'g'},
+    ],
+    tecnica:'MANTEQUILLA POMADA — sacar de nevera 2h antes. NO fria. Con mantequilla fria la masa sale pegajosa e inmanejable.\\n\\nCOLOR EQUILIBRADO — el colorante va reducido a 4g (vs 8g en la cookie estandar). Con mantequilla pomada el colorante se integra diferente y con menos cantidad consigues un rojo-rosado elegante, no agresivo. Si quieres mas intensidad de color puedes subir a 6g, nunca mas de 6g en este formato.\\n\\nCacao suave NO alcalinizado a solo 12g — el cacao en exceso apaga el color rojo. A 12g da profundidad de sabor sin interferir con el color.\\n\\nSIN LEVADURA ni MAIZENA. CHUNKS EN SUPERFICIE una vez extendida la lamina, no en la masa.\\n\\nPROCESO:\\n1. Cremar mantequilla pomada + azucares pala plana vel.4 → 2min maximo. Mezcla homogenea, no airear.\\n2. Huevos uno a uno vel.2, luego vainilla. Vel.4 → 30seg.\\n3. Con mixer en marcha vel.2, añadir colorante gel. Maximo 20seg hasta color uniforme.\\n4. Harina + cacao tamizado + bicarbonato + sal, vel.1 → 45seg.\\n5. Cold rest nevera minimo 1h con masa limpia y SIN CHUNKS — los chunks van en superficie despues de extender, no en la masa.\\n\\nMETODO A — lamina cortada (local):\\nPaso 6: Extender masa entre dos papeles de horno con rodillo a 10-11mm exacto.\\nPaso 7: Nevera 15-20min hasta que la lamina este firme.\\nPaso 8: Presionar chunks de chocolate blanco en superficie suavemente con la palma.\\nPaso 9: Cortar rectangulos 8x3cm con cuchillo largo sin mover las piezas.\\nPaso 10: Congelar en bandeja plana 2h. Embolsar con papel entre capas.\\n\\nMETODO B — rulo (obrador):\\nPaso 6: Formar rulo de masa limpia SIN CHUNKS, 10cm x 3cm. Envolver en film. Congelar 3h.\\nPaso 7: Cortar lonchas 10-11mm desde congelado con cuchillo de sierra.\\nPaso 8: Presionar chunks de chocolate blanco en superficie de cada loncha.\\nPaso 9: Recongelar 30min. Embolsar con papel entre capas.',
+    horneado:'HORNEAR SIEMPRE DESDE CONGELADO.\\nConvencional: 160°C 20-24min. Ventilado: 150°C 18-22min.\\nEl color rojo se oscurece en horno — normal. El color real se ve en frio.\\nSin referencia de dorado por el color oscuro — fijarse en bordes secos y superficie mate.\\nDEJAR ENFRIAR COMPLETAMENTE en bandeja antes de mover. El crujiente se forma al enfriarse.'
+  },
+  {
+    id:'dopi-fries-chocolate', nombre:'Cookie Fries — Chocolate',
+    desc:'Masa intensa de cacao Valrhona. Chips dark 54% en superficie. Crujiente exterior, sabor profundo. Perfecto con dips de caramelo o frutos rojos.',
+    preset:true,
+    ings:[
+      {grupo:'Húmedos',nombre:'Mantequilla sin sal (FRÍA en cubos 2cm)',cantidad:200,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar blanco granulado',cantidad:110,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar moreno (compacto)',cantidad:80,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Huevos L enteros',cantidad:2,unidad:'uds'},
+      {grupo:'Húmedos',nombre:'Extracto de vainilla pura',cantidad:8,unidad:'ml'},
+      {grupo:'Secos',nombre:'Harina de trigo (W170–200)',cantidad:380,unidad:'g'},
+      {grupo:'Secos',nombre:'Cacao en polvo sin azúcar (Valrhona)',cantidad:30,unidad:'g'},
+      {grupo:'Secos',nombre:'Levadura química',cantidad:3,unidad:'g'},
+      {grupo:'Secos',nombre:'Bicarbonato sódico',cantidad:4,unidad:'g'},
+      {grupo:'Secos',nombre:'Sal fina (Maldon molida)',cantidad:9,unidad:'g'},
+      {grupo:'Superficie',nombre:'Chips chocolate dark 54% — en superficie',cantidad:100,unidad:'g'},
+      {grupo:'Superficie',nombre:'Sal en escamas Maldon (acabado)',cantidad:2,unidad:'g'},
+    ],
+    tecnica:'MANTEQUILLA POMADA — sacar de nevera 2h antes. NO fria. Con mantequilla fria la masa sale pegajosa e inmanejable.\\n\\nCacao Valrhona TAMIZADO obligatorio — los grumos de cacao no desaparecen al hornear y crean puntos amargos.\\n\\nChips dark 54% (no chunks) — los chips se funden y distribuyen mejor en una superficie plana que los chunks, creando una cobertura mas uniforme para untar.\\n\\nSIN LEVADURA ni MAIZENA. CHIPS EN SUPERFICIE una vez extendida la lamina, no en la masa.\\n\\nPROCESO:\\n1. Cremar mantequilla pomada + azucares pala plana vel.4 → 2min maximo. Mezcla homogenea, no airear.\\n2. Huevos uno a uno vel.2, luego vainilla. Vel.4 → 30seg.\\n3. Harina + cacao TAMIZADO + bicarbonato + sal vel.1 → 45-50seg. Puedes integrar algo mas que en la clasica — el gluten aqui es tu aliado.\\n4. Cold rest nevera minimo 1h con masa limpia y SIN CHIPS — los chips van en superficie despues de extender, no en la masa.\\n\\nMETODO A — lamina cortada (local):\\nPaso 5: Extender masa entre dos papeles de horno con rodillo a 10-11mm exacto.\\nPaso 6: Nevera 15-20min hasta que la lamina este firme.\\nPaso 7: Repartir chips dark 54% en superficie y presionar suavemente con la palma.\\nPaso 8: Cortar rectangulos 8x3cm con cuchillo largo sin mover las piezas.\\nPaso 9: Congelar en bandeja plana 2h. Embolsar con papel entre capas.\\n\\nMETODO B — rulo (obrador):\\nPaso 5: Formar rulo de masa limpia SIN CHIPS, 10cm x 3cm. Envolver en film. Congelar 3h.\\nPaso 6: Cortar lonchas 10-11mm desde congelado con cuchillo de sierra.\\nPaso 7: Presionar chips dark 54% en superficie de cada loncha.\\nPaso 8: Recongelar 30min. Embolsar con papel entre capas.',
+    horneado:'HORNEAR SIEMPRE DESDE CONGELADO.\\nConvencional: 158°C 20-25min. Ventilado: 148°C 18-22min. Temperatura ligeramente inferior — el cacao quema antes que la harina.\\nLa masa oscura dificulta ver el punto — fijarse en bordes secos y superficie completamente mate. El brillo indica que aun le falta.\\nDEJAR ENFRIAR COMPLETAMENTE en bandeja. Los chips de la superficie quedaran crujientes al enfriarse.\\nServir a temperatura ambiente. Con dip de caramelo salado o frutos rojos es la mejor combinacion.'
+  }
+,
+  {
+    id:'dopi-oreo', nombre:'Cookie Oreo — vB5',
+    desc:'Masa neutra con Oreo molido fino integrado y trozos gruesos. Color grisáceo característico, sabor intenso en cada mordisco.',
+    preset:true,
+    ings:[
+      {grupo:'Húmedos',nombre:'Mantequilla sin sal (fría, cubos 2cm)',cantidad:225,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar moreno (compacto)',cantidad:144,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar blanco granulado',cantidad:68,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Huevos L enteros',cantidad:2,unidad:'uds'},
+      {grupo:'Húmedos',nombre:'Extracto de vainilla pura',cantidad:10,unidad:'ml'},
+      {grupo:'Secos',nombre:'Harina de trigo (W170–200)',cantidad:400,unidad:'g'},
+      {grupo:'Secos',nombre:'Bicarbonato sódico',cantidad:5,unidad:'g'},
+      {grupo:'Secos',nombre:'Levadura química',cantidad:4,unidad:'g'},
+      {grupo:'Secos',nombre:'Sal fina (Maldon molida)',cantidad:8,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Oreo molido fino (con relleno — no separar)',cantidad:80,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Oreo troceado grueso 1–2cm (con relleno)',cantidad:80,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Sal en escamas Maldon (acabado)',cantidad:1,unidad:'g'},
+    ],
+    tecnica:'MASA NEUTRA — sin chocolate ni cacao en masa. El Oreo es el único protagonista.\nAZÚCAR REDUCIDO -15% — el relleno de crema Oreo aporta dulzor y grasa extra. No separar la galleta del relleno al triturar.\nDOS FORMATOS DE OREO: Molido fino (80g) — triturar en bolsa con rodillo hasta polvo grueso. Se integra en masa y da color grisáceo. Trozos gruesos (80g) — trocear en piezas de 1–2cm. Dan textura y bolsas de sabor.\nPROCESO: Triturar y trocear Oreos. Secos+bicarbonato+levadura+sal. Cremado mantequilla FRÍA vel.2→4→6. Huevos vel.2+vainilla. Harina vel.1 con Oreo molido incorporado. Mix-ins trozos a mano 10–15 pliegues. Cold rest 24–48h. Porcionar 100g bola alta.',
+    horneado:'Convencional: 175°C 16–20min. Ventilado: 165°C 15–18min desde congelado.\nSeñal: bordes dorados y mate, centro brillante. El color grisáceo de la masa es correcto.'
+  },
+  {
+    id:'dopi-lotus', nombre:'Cookie Lotus Biscoff — vB5',
+    desc:'Masa neutra con Lotus triturado y canela. Chocolate blanco chunks para contraste. Perfil especiado-caramelizado.',
+    preset:true,
+    ings:[
+      {grupo:'Húmedos',nombre:'Mantequilla sin sal (fría, cubos 2cm)',cantidad:225,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar moreno (compacto)',cantidad:153,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar blanco granulado',cantidad:72,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Huevos L enteros',cantidad:2,unidad:'uds'},
+      {grupo:'Húmedos',nombre:'Extracto de vainilla pura',cantidad:10,unidad:'ml'},
+      {grupo:'Secos',nombre:'Harina de trigo (W170–200)',cantidad:400,unidad:'g'},
+      {grupo:'Secos',nombre:'Canela en polvo',cantidad:2,unidad:'g'},
+      {grupo:'Secos',nombre:'Bicarbonato sódico',cantidad:5,unidad:'g'},
+      {grupo:'Secos',nombre:'Levadura química',cantidad:4,unidad:'g'},
+      {grupo:'Secos',nombre:'Sal fina (Maldon molida)',cantidad:8,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Lotus Biscoff triturado medio (en masa)',cantidad:70,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Chocolate blanco chunks (Callebaut W2)',cantidad:70,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Sal en escamas Maldon (acabado)',cantidad:1,unidad:'g'},
+    ],
+    tecnica:'MASA NEUTRA con canela — refuerza el perfil especiado del Lotus sin dominarlo.\nAZÚCAR REDUCIDO -10% — el Lotus ya tiene azúcar caramelizado intenso.\nLOTUS TRITURADO MEDIO — granulado grueso (como azúcar moreno húmedo). No polvo ni trozos grandes. Así da textura crujiente interna y sabor uniforme.\nPROCESO: Triturar Lotus hasta granulado grueso. Secos+canela+bicarbonato+levadura+sal. Cremado mantequilla FRÍA vel.2→4→6. Huevos+vainilla. Harina vel.1 con Lotus incorporado. Chunks chocolate blanco a mano 10–15 pliegues. Cold rest mínimo 48h. Porcionar 100g bola alta.',
+    horneado:'Convencional: 178°C 16–20min. Ventilado: 165°C 15–18min desde congelado.\nEl Lotus carameliza antes que la harina — no subir temperatura. Señal: bordes dorados y secos, centro brillante.'
+  },
+  {
+    id:'dopi-kinder', nombre:'Cookie Kinder — vB5',
+    desc:'Masa neutra con trozitos de Kinder de 1–1.5cm. El relleno cremoso forma bolsas fundidas en el interior. Azúcar reducido para equilibrar.',
+    preset:true,
+    ings:[
+      {grupo:'Húmedos',nombre:'Mantequilla sin sal (fría, cubos 2cm)',cantidad:225,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar moreno (compacto)',cantidad:136,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar blanco granulado',cantidad:68,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Huevos L enteros',cantidad:2,unidad:'uds'},
+      {grupo:'Húmedos',nombre:'Extracto de vainilla pura',cantidad:10,unidad:'ml'},
+      {grupo:'Secos',nombre:'Harina de trigo (W170–200)',cantidad:400,unidad:'g'},
+      {grupo:'Secos',nombre:'Bicarbonato sódico',cantidad:5,unidad:'g'},
+      {grupo:'Secos',nombre:'Levadura química',cantidad:4,unidad:'g'},
+      {grupo:'Secos',nombre:'Sal fina (Maldon molida)',cantidad:8,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Kinder trozitos 1–1.5cm (Bueno o Chocolate)',cantidad:140,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Sal en escamas Maldon (acabado)',cantidad:1,unidad:'g'},
+    ],
+    tecnica:'MASA NEUTRA — sin chocolate en masa para no tapar el perfil lácteo del Kinder.\nAZÚCAR REDUCIDO -20%/-15% — el Kinder tiene alto contenido de azúcar y grasa láctea.\nTAMAÑO CRÍTICO: trozos de 1–1.5cm exacto. Más pequeños se disuelven. Más grandes no funden bien. El relleno cremoso del Kinder Bueno crea bolsas de crema visibles al corte — efecto correcto y diferenciador.\nPROCESO: Trocear Kinder en 1–1.5cm y refrigerar 15min. Secos+bicarbonato+levadura+sal. Cremado mantequilla FRÍA vel.2→4→6. Huevos+vainilla. Harina vel.1. Trozitos de Kinder fríos a mano 10 pliegues suaves. Cold rest 48h. Porcionar 100g bola alta.',
+    horneado:'Convencional: 175°C 15–19min. Ventilado: 162°C 14–17min desde congelado.\nTemperatura ligeramente inferior — el azúcar lácteo del Kinder quema antes. El relleno puede rezumar ligeramente por los bordes — es correcto.'
+  }
+];
+let rbEditingId = null;
+let rbModalIngs = [];
+let rbIngId = 0;
+
+function rbInitSelector(){
+  const sel = document.getElementById('rb-selector');
+  if(!sel) return;
+  sel.innerHTML = recetas.map(r=>`<option value="${r.id}">${r.preset?'⭐ ':''}${r.nombre}</option>`).join('');
+  rbLoad();
+}
+
+function rbLoad(){
+  const id  = document.getElementById('rb-selector').value;
+  const r   = recetas.find(x => x.id === id);
+  if(!r) return;
+
+  document.getElementById('rb-del-btn').style.display = r.preset ? 'none' : '';
+
+  const rbQtyRaw = pf(document.getElementById('rb-qty')?.value) || 12;
+  const PESO_G_RB = pf(document.getElementById('rb-peso')?.value) || 140;
+  const BASE_N = 12; // receta base = 12 uds
+  const PESO_G = PESO_G_RB;
+
+  // totalMasaBase = suma de todos los ingredientes en gramos de la receta base
+  const totalMasaBase = r.ings.filter(i=>i.unidad==='g').reduce((s,i)=>s+i.cantidad,0);
+
+  // En modo kg: el factor se calcula sobre la masa total de ingredientes, no sobre el peso de porción
+  // Así 3.4kg de masa → factor = 3400 / totalMasaBase → masa escalada = 3.4kg exactos
+  const factor = rbMode === 'kg'
+    ? (rbQtyRaw * 1000) / totalMasaBase
+    : (Math.max(1, parseInt(rbQtyRaw) || 12)) / BASE_N;
+  const qty = rbMode === 'kg'
+    ? Math.round(factor * BASE_N)
+    : Math.max(1, parseInt(rbQtyRaw) || 12);
+
+  const GRP_COLORS = {
+    'Húmedos':'#F72585','Secos':'#6366f1','Mix-ins':'#78350f',
+    'Relleno':'#0ea5e9','Dips':'#0ea5e9','Otros':'#64748b'
+  };
+
+  // ── KPIs de producción ──
+  const totalMasaScaled = Math.round(totalMasaBase * factor);
+  const pesoHorneado = Math.round(PESO_G * 0.84);
+  const coldRestRec = r.id === 'dopi-chocolate' ? '48–72h' :
+                      r.id === 'dopi-limon'      ? '48–72h' :
+                      r.id === 'dopi-brownie'    ? '2–4h'   : '24–48h';
+  const kpiHtml =
+    '<div class="rb-prod-strip">'
+    + kpi('Unidades', qty, 'rosa')
+    + kpi('Masa total', totalMasaScaled+'g', '')
+    + kpi('Peso/cookie', PESO_G+'g masa', '')
+    + kpi('Cold rest', coldRestRec, 'verde')
+    + '</div>';
+
+  function kpi(label, val, cls){
+    return '<div class="rb-prod-kpi"><div class="rb-prod-kpi-label">' + label + '</div>'
+      + '<div class="rb-prod-kpi-val ' + cls + '">' + val + '</div></div>';
+  }
+
+  // ── Tabla ingredientes escalada ──
+  const grupos = {};
+  r.ings.forEach(ing => {
+    if(!grupos[ing.grupo]) grupos[ing.grupo] = [];
+    grupos[ing.grupo].push(ing);
+  });
+  const harinaIng = r.ings.find(i => i.nombre.toLowerCase().includes('harina'));
+  const baseG     = harinaIng ? harinaIng.cantidad : null;
+
+  let ingRows = '';
+  Object.entries(grupos).forEach(([grp, ings]) => {
+    const dot = GRP_COLORS[grp] || '#94a3b8';
+    ingRows += '<tr class="rb-ing-group"><td colspan="5">' + grp + '</td></tr>';
+    ings.forEach(ing => {
+      const pct     = (baseG && ing.unidad === 'g') ? ((ing.cantidad/baseG)*100).toFixed(1)+'%' : '—';
+      const scaled  = ing.unidad === 'g'   ? Math.round(ing.cantidad * factor) + 'g'
+                    : ing.unidad === 'ml'  ? Math.round(ing.cantidad * factor) + 'ml'
+                    : ing.unidad === 'uds' ? Math.ceil(ing.cantidad * factor) + ' uds' : '—';
+      ingRows += '<tr>'
+        + '<td><div style="display:flex;align-items:center;gap:8px">'
+        + '<span style="width:7px;height:7px;border-radius:50%;background:'+dot+';flex-shrink:0;display:inline-block"></span>'
+        + '<span style="font-weight:600">'+ing.nombre+'</span></div></td>'
+        + '<td class="r" style="color:var(--muted);font-size:12px">'+ing.cantidad+' '+ing.unidad+'</td>'
+        + '<td class="r" style="font-size:16px;font-weight:700;color:var(--rosa)">'+scaled+'</td>'
+        + '<td class="r" style="color:var(--muted)">'+ing.unidad+'</td>'
+        + '<td class="r" style="color:var(--muted2);font-size:12px">'+pct+'</td>'
+        + '</tr>';
+    });
+  });
+  const totalScaled = Math.round(totalMasaBase * factor);
+  ingRows += '<tr style="background:var(--rosa-light);border-top:2px solid rgba(247,37,133,0.2)">'
+    + '<td colspan="2" style="font-weight:700;font-family:Inter,sans-serif;color:var(--rosa)">MASA TOTAL</td>'
+    + '<td class="r" style="font-weight:700;font-family:Inter,sans-serif;color:var(--rosa);font-size:16px">'+totalScaled+'g</td>'
+    + '<td colspan="2"></td></tr>';
+
+  const ingTable = '<div style="overflow-x:auto"><table class="rb-ing-table">'
+    + '<thead><tr><th>Ingrediente</th><th class="r" style="color:var(--muted2)">Base 12</th>'
+    + '<th class="r" style="color:var(--rosa)">Para '+qty+' uds</th>'
+    + '<th class="r">Unidad</th><th class="r">Baker&#39;s%</th></tr></thead>'
+    + '<tbody>'+ingRows+'</tbody></table></div>';
+
+  // ── Paso a paso ──
+  const steps = buildSteps(r, qty, factor, PESO_G, coldRestRec);
+
+  const stepsHtml = '<div class="card" style="margin-bottom:14px;padding:0;overflow:hidden">'
+    + '<div style="background:var(--surface2);padding:12px 18px;border-bottom:1px solid var(--border)">'
+    + '<span style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">📋 Paso a paso — '+qty+' cookies</span></div>'
+    + '<div style="padding:16px 18px">'
+    + steps.map((s,i) => {
+        const cls = s.warn ? 'rb-warn-step' : s.critical ? 'rb-critical-step' : '';
+        return '<div class="rb-step ' + cls + '">'
+          + '<div class="rb-step-num">'+(i+1)+'</div>'
+          + '<div class="rb-step-body">'+s.text+'</div>'
+          + '</div>';
+      }).join('')
+    + '</div></div>';
+
+  // ── Horneado ──
+  const hornHtml = r.horneado ? '<div class="card" style="padding:0;overflow:hidden">'
+    + '<div style="background:var(--surface2);padding:12px 18px;border-bottom:1px solid var(--border)">'
+    + '<span style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">🔥 Horneado — parámetros</span></div>'
+    + '<div style="padding:16px 18px">' + buildHorneado(r, qty, PESO_G) + '</div></div>' : '';
+
+  const tagPreset = r.preset
+    ? '<span class="rb-tag">⭐ Receta DOPI</span>'
+    : '<span class="rb-tag" style="background:#f0fdf4;color:#15803d;border-color:rgba(21,128,61,0.2)">Mis recetas</span>';
+
+  document.getElementById('rb-viewer').innerHTML =
+    '<div class="card" style="margin-bottom:14px">'
+    + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap">'
+    + '<div><div style="font-size:20px;font-weight:800;margin-bottom:5px">'+r.nombre+'</div>'
+    + '<div style="font-size:13px;color:var(--muted);line-height:1.5">'+r.desc+'</div></div>'
+    + '<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'+tagPreset+'</div></div>'
+    + kpiHtml + ingTable + '</div>'
+    + stepsHtml + hornHtml;
+}
+
+function p(text){ return '<span class="rb-param">'+text+'</span>'; }
+
+function buildSteps(r, qty, factor, pesoG, coldRest){
+  const masaG = Math.round(r.ings.filter(i=>i.unidad==='g').reduce((s,i)=>s+i.cantidad,0) * factor);
+  const isBrownie = r.id === 'dopi-brownie';
+  const isFries   = r.id.includes('fries');
+
+  // ── FRIES — proceso completamente distinto ──────────────────
+  if(isFries){
+    const isRV    = r.id === 'dopi-fries-redvelvet';
+    const isChoco = r.id === 'dopi-fries-chocolate';
+    const mixinName = isRV    ? 'chunks de chocolate blanco'
+                    : isChoco ? 'chips dark 54%'
+                    : 'chips o chunks partidos';
+    const steps = [];
+    steps.push({text:'<strong>Mantequilla FRÍA en cubos</strong> — '+p('2cm de lado')+', directamente de nevera. La mantequilla fría controla la expansión en horno y da la estructura crujiente. '+p('NO a temperatura ambiente')+' para este formato.', warn:true});
+    steps.push({text:'<strong>Pesar ingredientes</strong> — '+p(masaG+'g masa total')+' para '+p(qty+' piezas')+'. Báscula obligatoria.'});
+    steps.push({text:'<strong>Cremado</strong> — KitchenAid pala plana. Mantequilla '+p('FRÍA en cubos')+' + azúcares. '+p('Vel.2 → 1min')+' · '+p('Vel.4 → 2min')+'. Resultado: textura arenosa. La mantequilla fría controla la expansión en horno y da la estructura crujiente.'});
+    if(isRV){
+      steps.push({text:'<strong>Huevos</strong> — '+p('Vel.2')+', uno a uno, luego vainilla. '+p('Vel.4 → 30seg')+'.'});
+      steps.push({text:'<strong>Colorante</strong> — con mixer en marcha '+p('Vel.2')+', añadir colorante gel. Máximo '+p('20seg')+' hasta color uniforme. Color rosado-rojizo equilibrado — 4g da el tono correcto.', warn:true});
+      steps.push({text:'<strong>Secos</strong> — harina + cacao tamizado + bicarbonato + sal. '+p('Vel.1 → 45seg')+'. Masa limpia '+p('SIN CHUNKS')+'.'});
+    } else if(isChoco){
+      steps.push({text:'<strong>Huevos</strong> — '+p('Vel.2')+', uno a uno, luego vainilla. '+p('Vel.4 → 30seg')+'.'});
+      steps.push({text:'<strong>Secos</strong> — harina + cacao Valrhona '+p('TAMIZADO')+' + bicarbonato + sal. '+p('Vel.1 → 50seg')+'. Puedes integrar algo más que en la cookie estándar. Masa limpia '+p('SIN CHIPS')+'.'});
+    } else {
+      steps.push({text:'<strong>Huevos</strong> — '+p('Vel.2')+', uno a uno, luego vainilla. '+p('Vel.4 → 30seg')+'.'});
+      steps.push({text:'<strong>Secos</strong> — harina + bicarbonato + sal. '+p('Vel.1 → 45seg')+'. Masa limpia '+p('SIN CHIPS')+'.'});
+    }
+    steps.push({text:'<strong>Cold rest</strong> — nevera '+p('mínimo 1h')+' con masa limpia y sin mix-ins. La masa fría es mucho más manejable para extender.', warn:true});
+    steps.push({text:'<strong>Extender</strong> — entre dos papeles de horno con rodillo a '+p('8–10mm exacto')+'. Usar listones guía de igual grosor a ambos lados como referencia.'});
+    steps.push({text:'<strong>Enfriar lámina</strong> — nevera '+p('15–20min')+' hasta que la lámina esté firme al tacto. Este paso es clave para poder cortar limpio.'});
+    steps.push({text:'<strong>Mix-ins en superficie</strong> — repartir '+mixinName+' sobre la lámina y presionar suavemente con la palma. Solo incrustar, no aplanar más la masa.', warn:true});
+    steps.push({text:'<strong>Cortar</strong> — rectángulos de '+p('8×3cm')+' con cuchillo largo o cortador de pizza. Cortar directo sin mover las piezas.'});
+    steps.push({text:'<strong>Congelar</strong> — piezas en bandeja plana sin tocarse, '+p('2h')+' hasta completamente sólidas.'});
+    steps.push({text:'<strong>Embolsar</strong> — bolsa zip con papel de horno entre capas. Etiquetar: '+p('DOPI · '+r.nombre+' · Fecha')+'.'});
+    return steps;
+  }
+
+  if(isBrownie){
+    return [
+      {text:'<strong>Fundir</strong> mantequilla + chocolate negro a baño María o microondas (30 seg intervals). Remover hasta liso. Dejar enfriar a '+p('~40°C')+' antes de continuar — ni caliente ni frío.'},
+      {text:'<strong>Azúcares</strong> — mezclar manualmente la mezcla de chocolate enfriada con ambos azúcares en bol grande hasta integrar.'},
+      {text:'<strong>Huevos</strong> — añadir '+p(Math.ceil(3*factor)+' huevos')+' uno a uno con varilla o KitchenAid pala plana '+p('vel.3')+' durante '+p('3 min')+'. La mezcla debe quedar brillante y espesa — este paso es obligatorio.', warn:true},
+      {text:'<strong>Vainilla</strong> — incorporar el extracto y mezclar brevemente.'},
+      {text:'<strong>Secos</strong> — tamizar harina+cacao+sal. Incorporar con espátula en 3 adiciones, '+p('15–20 pliegues')+'. La masa quedará muy densa.'},
+      {text:'<strong>Mix-ins</strong> — chips/chunks de chocolate a mano, '+p('10 pliegues')+'.'},
+      {text:'<strong>Cold rest</strong> — cubrir con film a contacto. Refrigerar '+p(coldRest)+'. La masa se endurece — es normal y necesario.', warn:true},
+      {text:'<strong>Porcionar</strong> — '+p(qty+' porciones × '+pesoG+'g')+' con báscula. Manos enharinadas (masa muy pegajosa). Formar bola.', warn:true},
+      {text:'<strong>Pre-congelado</strong> — bolas en bandeja plana sin tocarse. Congelar '+p('2h destapadas')+' hasta sólidas.'},
+      {text:'<strong>Embolsar</strong> — bolsa zip con papel entre capas. Etiquetar: '+p('DOPI · Brownie · Fecha')+'.',},
+    ];
+  }
+
+  const hasColorante = r.ings.some(i => i.nombre.toLowerCase().includes('colorante'));
+  const hasLimon     = r.ings.some(i => i.nombre.toLowerCase().includes('limón') || i.nombre.toLowerCase().includes('limon'));
+  const hasCacao     = r.ings.some(i => i.nombre.toLowerCase().includes('cacao en polvo'));
+  const hasMaizena   = r.ings.some(i => i.nombre.toLowerCase().includes('maizena'));
+
+  const secosList = hasCacao
+    ? (hasMaizena ? 'harina + maizena + cacao tamizado + bicarbonato + levadura + sal'
+                  : 'harina + cacao tamizado + bicarbonato + levadura + sal')
+    : (hasMaizena ? 'harina + maizena + bicarbonato + levadura + sal'
+                  : 'harina + bicarbonato + levadura + sal');
+
+  const steps = [];
+  steps.push({text:'<strong>Pesar ingredientes</strong> — '+p(masaG+'g masa total')+' para '+p(qty+' cookies')+'. Báscula obligatoria. Mantequilla a '+p('4–8°C')+' — sacar de la nevera justo antes de usar.'});
+  steps.push({text:'<strong>Secos</strong> — mezclar '+secosList+' en un bol. Reservar.'});
+  steps.push({text:'<strong>Cremado</strong> — KitchenAid pala plana. Mantequilla fría en cubos + azúcares. '+p('Vel.2 → 1min')+' · '+p('Vel.4 → 3min')+' · '+p('Vel.6 → 2min')+'. Resultado: textura arenosa-grumosa. NO cremosa.', critical:true});
+
+  if(hasLimon){
+    steps.push({text:'<strong>Huevos + aromáticos</strong> — '+p('Vel.2')+', huevos uno a uno, luego vainilla, ralladura de limón y zumo. '+p('Vel.4 → 45seg')+'. La mezcla puede parecer cortada — es normal.'});
+  } else if(hasColorante){
+    steps.push({text:'<strong>Huevos</strong> — '+p('Vel.2')+', huevos uno a uno, luego vainilla. '+p('Vel.4 → 45seg')+'.'});
+    steps.push({text:'<strong>Colorante</strong> — con mixer en marcha '+p('Vel.2')+', añadir colorante gel. Máximo '+p('30seg')+' hasta color uniforme. No sobrebatir.', warn:true});
+  } else {
+    steps.push({text:'<strong>Huevos</strong> — '+p('Vel.2')+', huevos uno a uno, luego la vainilla. '+p('Vel.4 → 45seg')+'. Raspar paredes del bol.'});
+  }
+
+  steps.push({text:'<strong>Harina</strong> — '+p('Vel.1 mínima')+'. Añadir secos de una vez. Mezclar '+p('30–45seg')+'hasta que no haya harina visible. PARAR inmediatamente.', critical:true});
+  steps.push({text:'<strong>Mix-ins</strong> — retirar bol de la máquina. Incorporar chocolate a mano con espátula, '+p('10–15 pliegues')+'. Dejar trozos visibles.'});
+  steps.push({text:'<strong>Cold rest</strong> — cubrir con film a contacto. Refrigerar '+p(coldRest)+'. Este paso no es opcional — define la textura y el sabor final.', warn:true});
+  steps.push({text:'<strong>Porcionar</strong> — '+p(qty+' porciones × '+pesoG+'g')+'. Báscula obligatoria. Formar bolas altas (más altas que anchas). Opcional: presionar chunks extra encima de cada bola.'});
+  steps.push({text:'<strong>Pre-congelado</strong> — bolas en bandeja plana sin tocarse. Congelar '+p('2h destapadas')+' hasta completamente sólidas.'});
+  steps.push({text:'<strong>Embolsar</strong> — bolsa zip con papel de horno entre capas. Etiquetar: '+p('DOPI · '+r.nombre.split('—')[0].trim()+' · Fecha')+'.'});
+  return steps;
+}
+
+function buildHorneado(r, qty, pesoG){
+  const lines = r.horneado.split('\n');
+  const bandejaUds = 6;
+  const bandejas = Math.ceil(qty / bandejaUds);
+  const pesoHorneado = Math.round(pesoG * 0.84);
+
+  let html = '<div class="rb-prod-strip" style="margin-bottom:12px">'
+    + '<div class="rb-prod-kpi"><div class="rb-prod-kpi-label">Cookies/bandeja</div><div class="rb-prod-kpi-val">máx '+bandejaUds+'</div></div>'
+    + '<div class="rb-prod-kpi"><div class="rb-prod-kpi-label">Bandejas necesarias</div><div class="rb-prod-kpi-val rosa">'+bandejas+'</div></div>'
+    + '<div class="rb-prod-kpi"><div class="rb-prod-kpi-label">Peso horneado/ud</div><div class="rb-prod-kpi-val">~'+pesoHorneado+'g</div></div>'
+    + '<div class="rb-prod-kpi"><div class="rb-prod-kpi-label">Desde congelado</div><div class="rb-prod-kpi-val verde">sin descongelar</div></div>'
+    + '</div>';
+
+  lines.forEach(line => {
+    if(!line.trim()) return;
+    html += '<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f3f4f6">'
+      + '<span style="font-size:16px;flex-shrink:0">🔥</span>'
+      + '<span style="font-size:13px;color:var(--text);line-height:1.6">'+line+'</span></div>';
+  });
+  return html;
+}
+
+
+
+function rbNew(){
+  rbEditingId=null;
+  rbModalIngs=[{id:++rbIngId,grupo:'Húmedos',nombre:'',cantidad:'',unidad:'g'},{id:++rbIngId,grupo:'Secos',nombre:'',cantidad:'',unidad:'g'}];
+  document.getElementById('rb-modal-title').textContent='Nueva receta';
+  ['rb-nombre','rb-desc','rb-tecnica','rb-horneado'].forEach(id=>document.getElementById(id).value='');
+  rbRenderModalIngs();
+  document.getElementById('rb-modal').style.display='flex';
+}
+
+function rbEdit(){
+  const id=document.getElementById('rb-selector').value;
+  const r=recetas.find(x=>x.id===id);
+  if(!r) return;
+  rbEditingId=r.id;
+  rbModalIngs=r.ings.map(i=>({...i,id:++rbIngId}));
+  document.getElementById('rb-modal-title').textContent='Editar — '+r.nombre;
+  document.getElementById('rb-nombre').value=r.nombre;
+  document.getElementById('rb-desc').value=r.desc;
+  document.getElementById('rb-tecnica').value=r.tecnica||'';
+  document.getElementById('rb-horneado').value=r.horneado||'';
+  rbRenderModalIngs();
+  document.getElementById('rb-modal').style.display='flex';
+}
+
+function rbCloseModal(){ document.getElementById('rb-modal').style.display='none'; }
+
+function rbAddIng(){
+  rbModalIngs.push({id:++rbIngId,grupo:'Húmedos',nombre:'',cantidad:'',unidad:'g'});
+  rbRenderModalIngs();
+}
+
+function rbRemoveIng(id){
+  rbModalIngs=rbModalIngs.filter(i=>i.id!==id);
+  rbRenderModalIngs();
+}
+
+function rbRenderModalIngs(){
+  const grupos=['Húmedos','Secos','Mix-ins','Dips','Otros'];
+  document.getElementById('rb-ings-list').innerHTML=rbModalIngs.map(ing=>`
+    <div style="display:grid;grid-template-columns:1fr 90px 80px 36px;gap:8px;align-items:center;margin-bottom:6px">
+      <input type="text" placeholder="Nombre del ingrediente" value="${ing.nombre}" class="rb-field"
+        oninput="rbModalIngs.find(i=>i.id===${ing.id}).nombre=this.value">
+      <input type="text" inputmode="decimal" placeholder="Cant." value="${ing.cantidad}" class="rb-field"
+        style="text-align:right" oninput="rbModalIngs.find(i=>i.id===${ing.id}).cantidad=this.value">
+      <select class="rb-field" onchange="rbModalIngs.find(i=>i.id===${ing.id}).unidad=this.value">
+        ${UNIDADES_ING.map(u=>`<option value="${u}"${u===ing.unidad?' selected':''}>${u}</option>`).join('')}
+      </select>
+      <button class="btn-del" onclick="rbRemoveIng(${ing.id})">✕</button>
+    </div>
+    <div style="margin-bottom:10px">
+      <select class="unit-sel" onchange="rbModalIngs.find(i=>i.id===${ing.id}).grupo=this.value">
+        ${grupos.map(g=>`<option value="${g}"${g===ing.grupo?' selected':''}>${g}</option>`).join('')}
+      </select>
+    </div>
+  `).join('');
+}
+
+function rbSave(){
+  const nombre=document.getElementById('rb-nombre').value.trim();
+  if(!nombre){ alert('Escribe un nombre para la receta'); return; }
+  const ings=rbModalIngs.map(i=>({
+    grupo:i.grupo, nombre:i.nombre,
+    cantidad:parseFloat(String(i.cantidad).replace(',','.'))||0,
+    unidad:i.unidad,
+  })).filter(i=>i.nombre);
+  const receta={
+    id:rbEditingId||'custom-'+Date.now(), nombre,
+    desc:document.getElementById('rb-desc').value.trim(),
+    preset:false, ings,
+    tecnica:document.getElementById('rb-tecnica').value.trim(),
+    horneado:document.getElementById('rb-horneado').value.trim(),
+  };
+  if(rbEditingId){ const idx=recetas.findIndex(r=>r.id===rbEditingId); recetas[idx]=receta; }
+  else recetas.push(receta);
+  rbCloseModal();
+  rbInitSelector();
+  document.getElementById('rb-selector').value=receta.id;
+  rbLoad();
+}
+
+function rbDelete(){
+  const id=document.getElementById('rb-selector').value;
+  const r=recetas.find(x=>x.id===id);
+  if(!r||r.preset) return;
+  if(!confirm(`¿Eliminar "${r.nombre}"?`)) return;
+  recetas=recetas.filter(x=>x.id!==id);
+  rbInitSelector();
+}
+
+document.getElementById('rb-modal').addEventListener('click',function(e){ if(e.target===this) rbCloseModal(); });
+
+rbInitSelector();
+
+// ══════════════════════════════════════════════════════════════
+// FROSTINGS & DIPS
+// ══════════════════════════════════════════════════════════════
+
+let exMode = 'uds'; // 'uds' | 'g'
+
+const EXTRAS = [
+  // ── FROSTINGS ──────────────────────────────────────────────
+  {
+    id:'frost-rv', nombre:'Frosting Queso Crema', tipo:'frosting',
+    para:'Red Velvet',
+    desc:'Queso crema frío + mantequilla pomada. Sedoso y ligeramente ácido. El clásico de la Red Velvet.',
+    baseUds:12,
+    conservacion:'Nevera 7 días. No congelar — el queso crema separa.',
+    servicio:'Sacar 10–15 min antes de servir. Si está muy firme, batir brevemente.',
+    ings:[
+      {nombre:'Queso crema FRÍO (Philadelphia)',cantidad:225,unidad:'g'},
+      {nombre:'Mantequilla sin sal (pomada)',cantidad:115,unidad:'g'},
+      {nombre:'Azúcar glass (tamizado)',cantidad:300,unidad:'g'},
+      {nombre:'Extracto de vainilla pura',cantidad:5,unidad:'ml'},
+      {nombre:'Sal fina',cantidad:1,unidad:'g'},
+    ],
+    pasos:[
+      {t:'Temperaturas opuestas', s:'Queso crema FRÍO de nevera. Mantequilla POMADA a temperatura ambiente. Esta combinación es crítica — queso a temperatura ambiente = frosting líquido.', warn:true},
+      {t:'Batir mantequilla', s:'Batidora velocidad alta 2 min hasta pálida y esponjosa.'},
+      {t:'Añadir queso frío', s:'Queso en trozos. Velocidad media 1 min. No sobrebatir — el exceso de batido licúa el frosting.', warn:true},
+      {t:'Azúcar glass y vainilla', s:'Azúcar tamizado en 2–3 adiciones a velocidad baja. Luego vainilla y sal.'},
+      {t:'Batido final', s:'Velocidad alta 1 min. Frosting liso y brillante. Debe mantener la forma al levantar las varillas.'},
+      {t:'Refrigerar', s:'Nevera 20 min antes de untar. El frío lo afirma.'},
+    ]
+  },
+  {
+    id:'frost-clasica', nombre:'Buttercream Vainilla', tipo:'frosting',
+    para:'Cookie Clásica',
+    desc:'Mantequilla pomada + azúcar glass + vainilla. Suave, aromático, versátil.',
+    baseUds:12,
+    conservacion:'Nevera 7 días. Congela hasta 1 mes.',
+    servicio:'Sacar 15 min antes de servir. Batir brevemente si ha endurecido.',
+    ings:[
+      {nombre:'Mantequilla sin sal (pomada)',cantidad:225,unidad:'g'},
+      {nombre:'Azúcar glass (tamizado)',cantidad:320,unidad:'g'},
+      {nombre:'Nata para montar 35% MG (fría)',cantidad:30,unidad:'ml'},
+      {nombre:'Extracto de vainilla pura',cantidad:8,unidad:'ml'},
+      {nombre:'Sal fina',cantidad:1,unidad:'g'},
+    ],
+    pasos:[
+      {t:'Batir mantequilla — 3 min', s:'Velocidad alta 3 min hasta pálida, casi blanca y muy esponjosa. Este paso define la ligereza del frosting.'},
+      {t:'Azúcar glass', s:'En 3 adiciones a velocidad baja. Velocidad media entre adiciones. Rasca paredes del bol.'},
+      {t:'Vainilla, sal y nata', s:'Añade vainilla, sal y nata fría de 1 en 1 cdta hasta textura deseada. Más nata = más suave. Menos nata = más firme.'},
+      {t:'Batido final — 2 min', s:'Velocidad alta 2 min hasta muy liso y esponjoso. Picos suaves al levantar varillas.'},
+      {t:'Refrigerar', s:'Nevera 15 min antes de usar.'},
+    ]
+  },
+  {
+    id:'frost-choco', nombre:'Frosting Chocolate', tipo:'frosting',
+    para:'Brownie + Cookie Chocolate',
+    desc:'Cacao Valrhona + mantequilla pomada. Intenso y profundo. Complementa el interior fudgy del Brownie.',
+    baseUds:12,
+    conservacion:'Nevera 7 días. Congela hasta 1 mes.',
+    servicio:'Sacar 10 min antes de servir.',
+    ings:[
+      {nombre:'Mantequilla sin sal (pomada)',cantidad:225,unidad:'g'},
+      {nombre:'Cacao en polvo sin azúcar (Valrhona)',cantidad:60,unidad:'g'},
+      {nombre:'Azúcar glass (tamizado)',cantidad:280,unidad:'g'},
+      {nombre:'Nata para montar 35% MG (fría)',cantidad:45,unidad:'ml'},
+      {nombre:'Extracto de vainilla pura',cantidad:5,unidad:'ml'},
+      {nombre:'Sal fina',cantidad:1,unidad:'g'},
+    ],
+    pasos:[
+      {t:'Tamizar cacao + azúcar glass', s:'Obligatorio — tamizar juntos en el mismo bol. Los grumos de cacao no desaparecen al batir.', warn:true},
+      {t:'Batir mantequilla — 2 min', s:'Velocidad alta 2 min hasta pálida y esponjosa.'},
+      {t:'Incorporar cacao y azúcar', s:'En 3 adiciones a velocidad baja. El frosting quedará seco y denso — es normal.'},
+      {t:'Vainilla, sal y nata', s:'Añade vainilla, sal y nata fría cda a cda hasta textura deseada.'},
+      {t:'Batido final — 2 min', s:'Velocidad alta 2 min. Frosting liso y oscuro con cuerpo firme.'},
+      {t:'Refrigerar', s:'Nevera 15 min antes de usar.'},
+    ]
+  },
+  {
+    id:'frost-limon', nombre:'Frosting Limón', tipo:'frosting',
+    para:'Cookie Limón & Chocolate Blanco',
+    desc:'Mantequilla pomada + azúcar glass + corteza de limón artesanal + zumo. Fresco y cítrico.',
+    baseUds:12,
+    conservacion:'Nevera 5–7 días en recipiente hermético.',
+    servicio:'Sacar 10 min antes de servir. Si queda muy blando añadir 20–30g más de azúcar glass.',
+    ings:[
+      {nombre:'Mantequilla sin sal (pomada)',cantidad:200,unidad:'g'},
+      {nombre:'Azúcar glass (tamizado)',cantidad:300,unidad:'g'},
+      {nombre:'Corteza de limón artesanal',cantidad:5,unidad:'g'},
+      {nombre:'Zumo de limón natural (colado)',cantidad:15,unidad:'ml'},
+      {nombre:'Sal fina',cantidad:1,unidad:'g'},
+    ],
+    pasos:[
+      {t:'Batir mantequilla — 3 min', s:'Velocidad alta 3 min hasta pálida y muy esponjosa.'},
+      {t:'Azúcar glass', s:'En 3 adiciones a velocidad baja. Velocidad media entre adiciones.'},
+      {t:'Corteza, zumo y sal', s:'Añade corteza artesanal (5g — más concentrada que ralladura fresca), zumo y sal. Velocidad media 30 seg.'},
+      {t:'Batido final', s:'Velocidad alta 1 min. Frosting liso con color amarillo pálido natural. Prueba y ajusta acidez.'},
+      {t:'Refrigerar — importante', s:'Nevera 20 min mínimo — el zumo lo hace más blando que otros frostings. El frío lo afirma.', warn:true},
+    ]
+  },
+  // ── DIPS ───────────────────────────────────────────────────
+  {
+    id:'dip-nutella', nombre:'Dip Nutella — Fries', tipo:'dip',
+    para:'Cookie Fries — todas las variantes',
+    desc:'Nutella fluidificada con aceite de girasol. Sin lacteos. 7-10 dias temperatura ambiente. Textura fluida para vasito de mojado.',
+    rinde:'~221g · 8-10 vasitos',
+    baseUds:8,
+    conservacion:'Temperatura ambiente 7-10 dias en recipiente hermetico. Nevera hasta 3 semanas. En nevera espesa — sacar 15min antes o 10seg microondas potencia minima.',
+    servicio:'Vasito individual junto a las fries. Temperatura ambiente. Remover antes de servir si ha estado en nevera.',
+    ings:[
+      {nombre:'Nutella', cantidad:200, unidad:'g'},
+      {nombre:'Aceite de girasol (neutro)', cantidad:20, unidad:'ml'},
+      {nombre:'Sal fina (pizca)', cantidad:1, unidad:'g'},
+    ],
+    pasos:[
+      {t:'Fundir aceite de girasol', s:'Siempre liquido — no necesita calentarse. Añadir directamente.'},
+      {t:'Templar Nutella', s:'20 seg potencia media (50%). Mezcla — debe estar tibia y fluida, no caliente.'},
+      {t:'Incorporar aceite', s:'Añade aceite de girasol poco a poco mezclando con espatula. Se integra en 30 seg. Añade sal.'},
+      {t:'Probar textura', s:'Al levantar la espatula debe caer en hilo continuo y lento. Si queda muy espeso añade 5ml mas de aceite.'},
+      {t:'Envasar', s:'Recipiente hermetico o vasitos. Temperatura ambiente alejado de calor directo y luz solar.'},
+    ]
+  },
+  {
+    id:'dip-chocblanco', nombre:'Dip Chocolate Blanco & Canela', tipo:'dip',
+    para:'Fries clasica, Cookie Clasica, Cookie Limon',
+    desc:'Chocolate blanco con aceite de girasol y canela. Sin lacteos. 7-10 dias temperatura ambiente.',
+    rinde:'~212g · 8-10 vasitos',
+    baseUds:8,
+    conservacion:'Temperatura ambiente 7-10 dias en hermetico. Nevera hasta 3 semanas. Puede solidificar — 10 seg microondas potencia minima y mezclar.',
+    servicio:'Vasito individual. Temperatura ambiente. El aceite de girasol regula la textura con la temperatura — normal que varie.',
+    ings:[
+      {nombre:'Chocolate blanco (Callebaut W2)', cantidad:180, unidad:'g'},
+      {nombre:'Aceite de girasol (neutro)', cantidad:30, unidad:'ml'},
+      {nombre:'Canela en polvo', cantidad:1.5, unidad:'g'},
+      {nombre:'Sal fina (pizca)', cantidad:1, unidad:'g'},
+    ],
+    pasos:[
+      {t:'Fundir aceite de girasol', s:'Siempre liquido — no necesita calentarse.'},
+      {t:'Fundir chocolate blanco', s:'Troceado fino. 30 seg potencia media (50%) + mezcla. Repetir hasta liso. Nunca potencia alta.'},
+      {t:'Incorporar aceite', s:'Añade aceite de girasol al chocolate fundido. Mezcla hasta liso y brillante.'},
+      {t:'Aromatizar', s:'Añade canela y sal. Mezcla y prueba.'},
+      {t:'Reposar y envasar', s:'20 min temperatura ambiente. Envasar hermetico.'},
+    ]
+  },
+  {
+    id:'dip-nocciola', nombre:'Dip Nocciola & Chocolate Blanco', tipo:'dip',
+    para:'Todas las cookies y fries',
+    desc:'Crema de avellana pura con chocolate blanco y aceite de girasol. Sin lacteos. 7-10 dias temperatura ambiente.',
+    rinde:'~226g · 8-10 vasitos',
+    baseUds:8,
+    conservacion:'Temperatura ambiente 7-10 dias en hermetico. Nevera hasta 3 semanas.',
+    servicio:'Vasito individual. La sal es imprescindible — potencia el sabor a avellana tostada notablemente.',
+    ings:[
+      {nombre:'Crema nocciola (pasta pura avellana)', cantidad:180, unidad:'g'},
+      {nombre:'Chocolate blanco (Callebaut W2)', cantidad:20, unidad:'g'},
+      {nombre:'Aceite de girasol (neutro)', cantidad:25, unidad:'ml'},
+      {nombre:'Sal fina', cantidad:1, unidad:'g'},
+    ],
+    pasos:[
+      {t:'Fundir aceite de girasol', s:'Siempre liquido — no necesita calentarse.'},
+      {t:'Fundir chocolate blanco', s:'20g troceado fino. 20 seg potencia media + mezcla. La pequena cantidad funde muy rapido.'},
+      {t:'Incorporar nocciola', s:'Añade crema nocciola al chocolate fundido. Mezcla hasta crema homogenea.'},
+      {t:'Aceite y sal', s:'Incorpora aceite de girasol poco a poco. Añade sal. Mezcla — la sal transforma el sabor.'},
+      {t:'Ajustar textura y envasar', s:'Hilo continuo al levantar espatula. Añade 5ml mas aceite si queda espeso. Envasar hermetico.'},
+    ]
+  },
+  {
+    id:'dip-pistacho', nombre:'Dip Pistacho & Chocolate Blanco', tipo:'dip',
+    para:'Fries Red Velvet, Cookie Limon, Cookie Red Velvet',
+    desc:'Crema de pistacho 15% con chocolate blanco. Sin lacteos. 7-10 dias temperatura ambiente. Aceite neutro para no alterar el sabor.',
+    rinde:'~211g · 8-10 vasitos',
+    baseUds:8,
+    conservacion:'Temperatura ambiente 7-10 dias en hermetico. Nevera hasta 3 semanas. Color verde natural — no anadir colorantes.',
+    servicio:'Vasito transparente para mostrar el color verde. Marida especialmente con Fries Red Velvet y Cookie Limon.',
+    ings:[
+      {nombre:'Crema pistacho 15%', cantidad:180, unidad:'g'},
+      {nombre:'Chocolate blanco (Callebaut W2)', cantidad:20, unidad:'g'},
+      {nombre:'Aceite de girasol (neutro, sin sabor)', cantidad:10, unidad:'ml'},
+      {nombre:'Sal fina', cantidad:1, unidad:'g'},
+    ],
+    pasos:[
+      {t:'Aceite neutro', s:'Usar aceite de girasol o aceite de girasol REFINADO (desodorizado, sin sabor). Usar siempre aceite de girasol para este dip — neutro y sin interferencias.'},
+      {t:'Fundir chocolate blanco', s:'20g troceado fino. 20 seg potencia media (50%) + mezcla. La pequena cantidad funde muy rapido — vigilar.'},
+      {t:'Incorporar crema pistacho', s:'Añade la crema de pistacho 15% al chocolate fundido caliente. Mezcla hasta crema homogenea y verde.'},
+      {t:'Aceite y sal', s:'Incorpora aceite de girasol poco a poco. La crema 15% ya tiene textura fluida — empieza con 10ml y añade mas solo si queda espeso. Añade sal. Mezcla.'},
+      {t:'Probar textura', s:'Debe caer en hilo continuo al levantar la espatula. La crema 15% es mas fluida que la pasta 30% — posiblemente no necesites todo el aceite.'},
+      {t:'Reposar y envasar', s:'20 min temperatura ambiente. Envasar hermetico.'},
+    ]
+  },
+];
+
+let exModeCurrent = 'uds';
+
+function exInitSelector(){
+  const sel = document.getElementById('ex-selector');
+  if(!sel) return;
+
+  // Group by tipo
+  const frostings = EXTRAS.filter(e=>e.tipo==='frosting');
+  const dips      = EXTRAS.filter(e=>e.tipo==='dip');
+
+  let html = '<optgroup label="── FROSTINGS ──">';
+  frostings.forEach(e => { html += `<option value="${e.id}">${e.nombre} — ${e.para}</option>`; });
+  html += '</optgroup><optgroup label="── DIPS ──">';
+  dips.forEach(e => { html += `<option value="${e.id}">${e.nombre} — ${e.para}</option>`; });
+  html += '</optgroup>';
+  sel.innerHTML = html;
+  exLoad();
+}
+
+function setExMode(mode){
+  exModeCurrent = mode;
+  document.getElementById('ex-mode-uds').classList.toggle('active', mode==='uds');
+  document.getElementById('ex-mode-g').classList.toggle('active', mode==='g');
+  document.getElementById('ex-qty-unit').textContent = mode==='g' ? 'g totales' : 'porciones';
+  document.getElementById('ex-qty').value = mode==='g' ? '200' : '12';
+  exLoad();
+}
+
+function exLoad(){
+  const id  = document.getElementById('ex-selector')?.value;
+  const e   = EXTRAS.find(x=>x.id===id);
+  if(!e) return;
+
+  const qtyRaw = pf(document.getElementById('ex-qty')?.value) || e.baseUds;
+  const BASE_G = e.ings.filter(i=>i.unidad==='g'||i.unidad==='ml').reduce((s,i)=>s+i.cantidad,0);
+
+  // Compute factor
+  let factor;
+  if(exModeCurrent==='g'){
+    factor = qtyRaw / BASE_G;
+  } else {
+    factor = qtyRaw / e.baseUds;
+  }
+
+  const totalG = Math.round(BASE_G * factor);
+
+  // Type badge
+  const isFrost = e.tipo === 'frosting';
+  const typeColor = isFrost ? '#6d28d9' : '#0369a1';
+  const typeBg    = isFrost ? '#f5f3ff' : '#eff6ff';
+  const typeLabel = isFrost ? '🍦 Frosting' : '🫙 Dip';
+
+  // KPIs
+  const kpiHtml = '<div class="rb-prod-strip" style="margin-bottom:14px">'
+    + exKpi(exModeCurrent==='uds'?'Porciones':'Gramos totales', exModeCurrent==='uds'?qtyRaw:qtyRaw+'g', 'rosa')
+    + exKpi('Masa total', totalG+'g', '')
+    + exKpi('Conservación', e.conservacion.split('.')[0], 'verde')
+    + exKpi('Para', e.para, '')
+    + '</div>';
+
+  function exKpi(label, val, cls){
+    return '<div class="rb-prod-kpi"><div class="rb-prod-kpi-label">'+label+'</div>'
+      +'<div class="rb-prod-kpi-val '+cls+'" style="font-size:'+(val.length>8?'14px':'20px')+'">'+val+'</div></div>';
+  }
+
+  // Ingredients table
+  let ingRows = '';
+  e.ings.forEach(ing=>{
+    const sc = ing.unidad==='g'||ing.unidad==='ml'
+      ? Math.round(ing.cantidad*factor*10)/10
+      : ing.cantidad;
+    const scDisplay = ing.unidad==='g'||ing.unidad==='ml'
+      ? (sc<10?sc.toFixed(1):Math.round(sc))+ing.unidad
+      : sc+' '+ing.unidad;
+    ingRows += '<tr>'
+      +'<td style="font-weight:600;padding:10px 14px;font-size:13px;border-bottom:1px solid #f3f4f6">'+ing.nombre+'</td>'
+      +'<td style="text-align:right;padding:10px 14px;color:var(--muted);font-family:Inter,sans-serif;border-bottom:1px solid #f3f4f6">'+ing.cantidad+' '+ing.unidad+'</td>'
+      +'<td style="text-align:right;padding:10px 14px;font-weight:700;font-size:16px;color:var(--rosa);font-family:Inter,sans-serif;border-bottom:1px solid #f3f4f6">'+scDisplay+'</td>'
+      +'</tr>';
+  });
+
+  const ingTable = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+    +'<thead><tr>'
+    +'<th style="padding:9px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface2)">Ingrediente</th>'
+    +'<th style="padding:9px 14px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);border-bottom:1px solid var(--border);background:var(--surface2)">Base '+e.baseUds+(e.tipo==='frosting'?' porc.':' porc.')+'</th>'
+    +'<th style="padding:9px 14px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--rosa);border-bottom:1px solid var(--border);background:var(--surface2)">Para '+(exModeCurrent==='g'?qtyRaw+'g':qtyRaw+' porc.')+'</th>'
+    +'</tr></thead>'
+    +'<tbody>'+ingRows+'</tbody></table></div>';
+
+  // Steps
+  const stepsHtml = '<div class="card" style="padding:0;overflow:hidden;margin-bottom:14px">'
+    +'<div style="background:var(--surface2);padding:12px 18px;border-bottom:1px solid var(--border)">'
+    +'<span style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">📋 Paso a paso</span></div>'
+    +'<div style="padding:16px 18px">'
+    +e.pasos.map((s,i)=>{
+      const cls = s.warn ? 'rb-warn-step' : '';
+      return '<div class="rb-step '+cls+'">'
+        +'<div class="rb-step-num">'+(i+1)+'</div>'
+        +'<div class="rb-step-body"><strong>'+s.t+'</strong><br><span style="color:var(--text-mid)">'+s.s+'</span></div>'
+        +'</div>';
+    }).join('')
+    +'</div></div>';
+
+  // Conservación + servicio
+  const notaHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+    +'<div class="rb-note-block" style="border-color:#16a34a">'
+    +'<div class="rb-note-label">🧊 Conservación</div>'
+    +'<div class="rb-note-text" style="font-size:13px">'+e.conservacion+'</div></div>'
+    +'<div class="rb-note-block" style="border-color:var(--naranja)">'
+    +'<div class="rb-note-label">🍽 Servicio</div>'
+    +'<div class="rb-note-text" style="font-size:13px">'+e.servicio+'</div></div>'
+    +'</div>';
+
+  document.getElementById('ex-viewer').innerHTML =
+    '<div class="card" style="margin-bottom:14px">'
+    +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap">'
+    +'<div>'
+    +'<div style="font-size:20px;font-weight:800;margin-bottom:5px">'+e.nombre+'</div>'
+    +'<div style="font-size:13px;color:var(--muted)">'+e.desc+'</div></div>'
+    +'<span style="background:'+typeBg+';color:'+typeColor+';border:1px solid '+typeColor+'33;border-radius:100px;font-size:11px;font-weight:700;padding:4px 12px;font-family:Inter,sans-serif;white-space:nowrap">'+typeLabel+'</span>'
+    +'</div>'
+    +kpiHtml+ingTable+'</div>'
+    +stepsHtml+notaHtml;
+}
+
+exInitSelector();
+</script>
+</body>
+</html>
