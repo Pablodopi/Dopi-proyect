@@ -825,7 +825,7 @@ function calcOnly(){
     </tr>`;
   });
   sc+='</tbody></table>';
-  setEl('scenarios',sc);
+  const scEl=document.getElementById('scenarios');if(scEl)scEl.innerHTML=sc;
 }
 
 // ─── RECALC ALL: re-init tablas + calcular ────────────────────────
