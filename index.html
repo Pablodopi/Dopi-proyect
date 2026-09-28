@@ -310,10 +310,28 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 
 <!-- ══ TAB RENTABILIDAD ══ -->
 <div class="panel" id="panel-rent">
-  <div class="pvp-row">
-    <label>Precio de venta por cookie (PVP)</label>
-    <input type="text" id="pvp" value="4.50" onkeydown="numOnly(event)" oninput="recalcAll()">
-    <span class="suf">€ / ud</span>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+    <div class="pvp-row" style="margin-bottom:0;flex-direction:column;align-items:flex-start;gap:6px">
+      <label style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">🍪 Cookie redonda — PVP</label>
+      <div style="display:flex;align-items:center;gap:8px;width:100%">
+        <input type="text" id="pvp" value="3.90" onkeydown="numOnly(event)" oninput="recalcAll()" style="flex:1">
+        <span class="suf">€ / ud</span>
+      </div>
+    </div>
+    <div class="pvp-row" style="margin-bottom:0;flex-direction:column;align-items:flex-start;gap:6px">
+      <label style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">🍟 Cookie Fries — PVP</label>
+      <div style="display:flex;align-items:center;gap:8px;width:100%">
+        <input type="text" id="pvp-fries" value="4.50" onkeydown="numOnly(event)" oninput="recalcAll()" style="flex:1">
+        <span class="suf">€ / ud</span>
+      </div>
+    </div>
+  </div>
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+    <span style="font-size:11px;color:var(--muted);font-weight:600">Rentabilidad calculada para:</span>
+    <select id="pvp-mode" onchange="recalcAll()" style="background:#fff;border:1px solid var(--border);border-radius:6px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:5px 10px;color:var(--text);outline:none;cursor:pointer">
+      <option value="redonda">🍪 Cookie redonda (€3.90)</option>
+      <option value="fries">🍟 Cookie Fries (€4.50)</option>
+    </select>
   </div>
 
   <div class="margin-hero pos" id="margin-hero">
@@ -528,18 +546,17 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 <script>
 // ─── RECETA BASE ───────────────────────────────────────────────
 const INGS = [
-  {g:'Húmedos',n:'Mantequilla sin sal (fría)',b:225,c:'#F72585',p:57.7,u:'kg',   apx:v=>`${v}g · ${(v/227).toFixed(2)} sticks`},
-  {g:'Húmedos',n:'Azúcar moreno (compacto)', b:180,c:'#FF7700',p:46.2,u:'kg',   apx:v=>`${v}g · ${(v/220).toFixed(1)} tazas`},
-  {g:'Húmedos',n:'Azúcar blanco granulado',  b:80, c:'#f59e0b',p:20.5,u:'kg',   apx:v=>`${v}g · ${(v/200).toFixed(1)} tazas`},
-  {g:'Húmedos',n:'Huevos L enteros',         b:116,c:'#e8a020',p:29.7,u:'docena',apx:v=>`${Math.round(v/58)} uds (${v}g)`},
-  {g:'Húmedos',n:'Extracto vainilla pura',   b:10, c:'#b45309',p:2.6, u:'ml',   apx:v=>`${v}ml · ${(v/5).toFixed(0)} cdtas`},
-  {g:'Secos',  n:'Harina de trigo (W170–200)',b:390,c:'#6366f1',p:100, u:'kg',   apx:v=>`${v}g · ${(v/122).toFixed(1)} tazas`},
-  {g:'Secos',  n:'Maizena (almidón de maíz)', b:12, c:'#0ea5e9',p:3.1, u:'kg',   apx:v=>`${v}g · ${(v/8).toFixed(1)} cdas`},
-  {g:'Secos',  n:'Bicarbonato sódico',        b:5,  c:'#ec4899',p:1.3, u:'kg',   apx:v=>`${v}g · ${(v/6).toFixed(1)} cdtas`},
-  {g:'Secos',  n:'Levadura química',          b:4,  c:'#a855f7',p:1.0, u:'kg',   apx:v=>`${v}g · ${(v/4).toFixed(1)} cdtas`},
-  {g:'Secos',  n:'Sal fina (Maldon molida)',  b:8,  c:'#64748b',p:2.1, u:'kg',   apx:v=>`${v}g · ${(v/6).toFixed(1)} cdtas`},
-  {g:'Mix-ins',n:'Chocolate negro 70% chunks',b:220,c:'#78350f',p:56.4,u:'kg',   apx:v=>`${v}g`},
-  {g:'Mix-ins',n:'Sal en escamas Maldon',     b:2,  c:'#94a3b8',p:0.5, u:'kg',   apx:v=>`${v}g · al gusto`},
+  {g:'Húmedos',n:'Mantequilla sin sal (fría)',b:225,c:'#F72585',p:57.7,u:'kg',   price:8.20,  apx:v=>`${v}g · ${(v/227).toFixed(2)} sticks`},
+  {g:'Húmedos',n:'Azúcar moreno (compacto)', b:170,c:'#FF7700',p:42.5,u:'kg',   price:1.90,  apx:v=>`${v}g · ${(v/220).toFixed(1)} tazas`},
+  {g:'Húmedos',n:'Azúcar blanco granulado',  b:80, c:'#f59e0b',p:20.0,u:'kg',   price:0.90,  apx:v=>`${v}g · ${(v/200).toFixed(1)} tazas`},
+  {g:'Húmedos',n:'Huevos L enteros',         b:116,c:'#e8a020',p:29.0,u:'docena',price:3.05, apx:v=>`${Math.round(v/58)} uds (${v}g)`},
+  {g:'Húmedos',n:'Extracto vainilla pura',   b:10, c:'#b45309',p:2.5, u:'ml',   price:23.25, apx:v=>`${v}ml · ${(v/5).toFixed(0)} cdtas`},
+  {g:'Secos',  n:'Harina de trigo (W170–200)',b:400,c:'#6366f1',p:100, u:'kg',   price:1.78,  apx:v=>`${v}g · ${(v/122).toFixed(1)} tazas`},
+  {g:'Secos',  n:'Bicarbonato sódico',        b:5,  c:'#ec4899',p:1.3, u:'kg',   price:3.67,  apx:v=>`${v}g · ${(v/6).toFixed(1)} cdtas`},
+  {g:'Secos',  n:'Levadura química',          b:4,  c:'#a855f7',p:1.0, u:'kg',   price:27.25, apx:v=>`${v}g · ${(v/4).toFixed(1)} cdtas`},
+  {g:'Secos',  n:'Sal fina (Maldon molida)',  b:8,  c:'#64748b',p:2.0, u:'kg',   price:2.60,  apx:v=>`${v}g · ${(v/6).toFixed(1)} cdtas`},
+  {g:'Mix-ins',n:'Chocolate negro 70% chunks',b:220,c:'#78350f',p:55.0,u:'kg',   price:11.00, apx:v=>`${v}g`},
+  {g:'Mix-ins',n:'Sal en escamas Maldon',     b:2,  c:'#94a3b8',p:0.5, u:'kg',   price:8.00,  apx:v=>`${v}g · al gusto`},
 ];
 const BASE_MASA = INGS.reduce((s,i)=>s+i.b,0);
 
@@ -652,7 +669,7 @@ function initMasaTable(){
     html+=`<tr id="masa-row-${i}">
       <td><div class="nc"><span class="dot" style="background:${ing.c}"></span>${ing.n}</div></td>
       <td><select class="unit-sel" id="mp-u-${i}" onchange="calcOnly()">${UNITS.map(o=>`<option value="${o.v}"${o.v===ing.u?' selected':''}>${o.l}</option>`).join('')}</select></td>
-      <td class="r"><input class="num-input" type="text" id="mp-p-${i}" value="" placeholder="0.00" oninput="calcOnly()"></td>
+      <td class="r"><input class="num-input" type="text" id="mp-p-${i}" value="${ing.price||''}" placeholder="0.00" oninput="calcOnly()"></td>
       <td class="r" id="mp-cant-${i}" style="color:var(--muted)">—</td>
       <td class="r" id="mp-cost-${i}">—</td>
       <td class="r" id="mp-cpc-${i}" style="color:var(--muted)">—</td>
@@ -774,7 +791,10 @@ function calcOnly(){
   setEl('sep-ind', fE(indB));
 
   // — rentabilidad —
-  const pvp=pf(document.getElementById('pvp').value);
+  const pvpMode = document.getElementById('pvp-mode')?.value || 'redonda';
+  const pvpRedonda = pf(document.getElementById('pvp').value) || 3.90;
+  const pvpFries   = pf(document.getElementById('pvp-fries')?.value) || 4.50;
+  const pvp = pvpMode === 'fries' ? pvpFries : pvpRedonda;
   const totB=totalMasa+totalDips+totalPack+indB;
   const cc=n>0?totB/n:0, mc=pvp-cc, mp=pvp>0?(mc/pvp)*100:0;
   const ing=pvp*n, ben=ing-totB;
@@ -811,6 +831,12 @@ function calcOnly(){
   setEl('r-breakeven',fE(cc));
 
   // Scenarios
+  // Update selector labels with current prices
+  const selMode = document.getElementById('pvp-mode');
+  if(selMode){
+    selMode.options[0].text = `🍪 Cookie redonda (€${pvpRedonda.toFixed(2)})`;
+    selMode.options[1].text = `🍟 Cookie Fries (€${pvpFries.toFixed(2)})`;
+  }
   const pvps=[pvp*0.7,pvp*0.85,pvp,pvp*1.15,pvp*1.3].filter(v=>v>0);
   let sc=`<table class="tbl"><thead><tr><th>PVP/cookie</th><th class="r">Ingresos</th><th class="r">Beneficio</th><th class="r">Margen</th><th class="r">Valoración</th></tr></thead><tbody>`;
   pvps.forEach(pp=>{
@@ -937,29 +963,8 @@ let recetas = [
     ],
     tecnica:'⚠ PROCESO COMPLETAMENTE DISTINTO AL RESTO — leer con atención.\nFundir juntos mantequilla + chocolate a baño María. Enfriar a ~40°C.\nMezclar manualmente con ambos azúcares hasta integrar.\nAñadir 3 huevos uno a uno + vainilla, batir 3 min a vel.3 — mezcla brillante y espesa.\nTamizar harina + cacao + sal, incorporar con espátula en 3 adiciones, 15–20 pliegues.\nChips/chunks a mano, 10 pliegues.\nCold rest nevera mínimo 2h (preferible 4h). La masa se endurece — es normal.\n⚠ SIN LEVADURA NI BICARBONATO — no añadir bajo ningún concepto.',
     horneado:'Convencional: 175°C 16–20min. Ventilado: 160°C 16–20min.\nSeñal: corteza mate con pequeñas grietas, borde firme, centro todavía húmedo.\nEsta cookie es más plana que el resto — es característica de la receta, no un defecto.'
-  },
-  {
-    id:'dopi-chocolate', nombre:'Cookie Chocolate — vB4',
-    desc:'Mix de chips 54% y chunks 70%. Mayor ratio azúcar moreno. Textura perfecta, sabor profundo.',
-    preset:true,
-    ings:[
-      {grupo:'Húmedos',nombre:'Mantequilla sin sal (fría, cubos 2cm)',cantidad:225,unidad:'g'},
-      {grupo:'Húmedos',nombre:'Azúcar moreno (compacto)',cantidad:143,unidad:'g'},
-      {grupo:'Húmedos',nombre:'Azúcar blanco granulado',cantidad:77,unidad:'g'},
-      {grupo:'Húmedos',nombre:'Huevos L enteros',cantidad:2,unidad:'uds'},
-      {grupo:'Húmedos',nombre:'Extracto de vainilla pura (doble concentración)',cantidad:15,unidad:'ml'},
-      {grupo:'Secos',nombre:'Harina de trigo (W170–200)',cantidad:388,unidad:'g'},
-      {grupo:'Secos',nombre:'Maizena (almidón de maíz)',cantidad:14,unidad:'g'},
-      {grupo:'Secos',nombre:'Bicarbonato sódico',cantidad:5,unidad:'g'},
-      {grupo:'Secos',nombre:'Levadura química',cantidad:4,unidad:'g'},
-      {grupo:'Secos',nombre:'Sal fina (Maldon molida)',cantidad:9,unidad:'g'},
-      {grupo:'Mix-ins',nombre:'Chips chocolate semi-amargo 54% (Callebaut)',cantidad:120,unidad:'g'},
-      {grupo:'Mix-ins',nombre:'Chunks chocolate negro 70%',cantidad:120,unidad:'g'},
-      {grupo:'Mix-ins',nombre:'Sal en escamas Maldon (acabado)',cantidad:2,unidad:'g'},
-    ],
-    tecnica:'Misma técnica base que Clásica.\nMix de chips + chunks es intencional — los chips se funden en la masa y los chunks crean bolsas visibles.\nNO sustituir ambos formatos por uno solo — cambia significativamente la textura.\nVainilla en doble concentración: no reducir.\nCold rest mínimo 48h — esta receta mejora notablemente con 72h.',
-    horneado:'Convencional: 185°C 18–22min. Ventilado: 170°C 18–22min.\nMismas señales que la Clásica: bordes dorados y mate, centro brillante.'
-  },
+  }
+,
   {
     id:'dopi-limon', nombre:'Limón & Chocolate Blanco — vB4',
     desc:'Cítrico suave y equilibrado con fondo de mantequilla y chocolate blanco. Perfil fresco y adulto.',
@@ -1132,6 +1137,29 @@ horneado:'HORNEAR SIEMPRE DESDE CONGELADO — nunca descongelar antes.\nConvenci
     ],
     tecnica:'MASA NEUTRA — sin chocolate en masa para no tapar el perfil lácteo del Kinder.\nAZÚCAR REDUCIDO -20%/-15% — el Kinder tiene alto contenido de azúcar y grasa láctea.\nTAMAÑO CRÍTICO: trozos de 1–1.5cm exacto. Más pequeños se disuelven. Más grandes no funden bien. El relleno cremoso del Kinder Bueno crea bolsas de crema visibles al corte — efecto correcto y diferenciador.\nPROCESO: Trocear Kinder en 1–1.5cm y refrigerar 15min. Secos+bicarbonato+levadura+sal. Cremado mantequilla FRÍA vel.2→4→6. Huevos+vainilla. Harina vel.1. Trozitos de Kinder fríos a mano 10 pliegues suaves. Cold rest 48h. Porcionar 100g bola alta.',
     horneado:'Convencional: 175°C 15–19min. Ventilado: 162°C 14–17min desde congelado.\nTemperatura ligeramente inferior — el azúcar lácteo del Kinder quema antes. El relleno puede rezumar ligeramente por los bordes — es correcto.'
+  }
+,
+  {
+    id:'dopi-chocolate-oscura', nombre:'Cookie Chocolate Masa Oscura — vB5',
+    desc:'Masa oscura de cacao medio. Chips chocolate blanco + chunks negro 70%. Interior chewy, contraste visual blanco/negro. Color chocolate americano equilibrado.',
+    preset:true,
+    ings:[
+      {grupo:'Húmedos',nombre:'Mantequilla sin sal (fría, cubos 2cm)',cantidad:225,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar moreno (compacto)',cantidad:155,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Azúcar blanco granulado',cantidad:75,unidad:'g'},
+      {grupo:'Húmedos',nombre:'Huevos L enteros',cantidad:2,unidad:'uds'},
+      {grupo:'Húmedos',nombre:'Extracto de vainilla pura',cantidad:12,unidad:'ml'},
+      {grupo:'Secos',nombre:'Harina de trigo (W170–200)',cantidad:370,unidad:'g'},
+      {grupo:'Secos',nombre:'Cacao en polvo (tamizado)',cantidad:45,unidad:'g'},
+      {grupo:'Secos',nombre:'Bicarbonato sódico',cantidad:5,unidad:'g'},
+      {grupo:'Secos',nombre:'Levadura química',cantidad:3,unidad:'g'},
+      {grupo:'Secos',nombre:'Sal fina (Maldon molida)',cantidad:8,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Chips chocolate blanco (Callebaut W2)',cantidad:110,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Chunks chocolate negro 70%',cantidad:110,unidad:'g'},
+      {grupo:'Mix-ins',nombre:'Sal en escamas Maldon (acabado)',cantidad:2,unidad:'g'},
+    ],
+    tecnica:'CACAO TAMIZADO obligatorio junto con la harina. Grumos de cacao no desaparecen al hornear.\nVainilla 12ml — potencia el perfil de cacao, no reducir.\nLevadura 3g (no 4g) — el cacao interactúa con los agentes leudantes.\n\nPROCESO:\n1. Tamizar harina + cacao + bicarbonato + levadura + sal juntos. Reservar.\n2. Cremado: mantequilla FRÍA en cubos. Vel.2→1min · Vel.4→3min · Vel.6→2min. Resultado arenoso. La masa oscura dificulta ver el cremado — controlar por tiempo.\n3. Huevos uno a uno vel.2, luego vainilla. Vel.4→45seg.\n4. Harina+cacao vel.1 mínima, 30–45seg. PARAR al integrar.\n5. Chips blancos + chunks negros a mano, 10–15 pliegues.\n6. Cold rest nevera mínimo 48h.\n7. Porcionar 140g. Bola alta. Presionar chips extra encima antes de congelar para contraste visual.',
+    horneado:'Unox Domenica ventilado: 163°C 10–13min desde congelado.\nSin referencia visual de dorado — fijarse en bordes firmes al tacto.\nReposo 10min en bandeja antes de mover.'
   }
 ];
 let rbEditingId = null;
@@ -1793,4 +1821,4 @@ function exLoad(){
 exInitSelector();
 </script>
 </body>
-</html>
+</html
